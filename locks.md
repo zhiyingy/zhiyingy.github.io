@@ -4,6 +4,6 @@
 Zhiying Yao (zhiyingy), Hongyi Ding(hongyid)
 
 ## Proposal
-[proposal](https://github.com/zhiyingy/zhiyingy.github.io/proposal.md)
+[proposal](https://github.com/zhiyingy/zhiyingy.github.io/blob/master/proposal.md)
 
 ## Final Report
