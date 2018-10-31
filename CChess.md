@@ -16,15 +16,16 @@ Each move is dependent on the previous move. Therefore, speedup might not be muc
 
 plan to achieve: <br />
 · a UI that the player can click on the board to play Xiangqi with our solver. <br />
+· a UI that demonstrates how a solver can play against another solver. <br />
 · a solver that are trained using minmax to beat an amateur 80% of the time. <br />
 
 Hope to achieve: <br />
 Implement the solver using MonteCarlo Tree Search algorithm. <br />
 
-At the poster session, we want to show a demo of how to play the game with our AI, and runtime comparison for making a move using different vector size.
+At the poster session, we want to show a demo of how to play the game with our solver, and how our solver can play against itself. We also want to show a runtime comparison for making a move using different vector size.
 
 ### Platform Choice
-We will choose C++ for its high-performance and completeness and various existing C++ based parallel libraries. 
+We will choose C++ for its high-performance and completeness and various existing C++ based parallel libraries. Since the workload is heavy, we want something hat has high-performance.
 
 We will be using CUDA when exploiting paralleism. We will train our solver on ghc machines.
 
