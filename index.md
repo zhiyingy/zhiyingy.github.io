@@ -18,9 +18,9 @@ Synchronization is an important topic in parallelism to ensure the correctness o
 
 ### Goals and Deliverables
 
-plan to achieve: <\br>
-· plan to implement different locks. <\br>
-· plan to implement a lock free AVL tree data structure. <\br>
+plan to achieve: <br />
+· plan to implement different locks. <br />
+· plan to implement a lock free AVL tree data structure. <br />
 
 Hope to achieve
 
