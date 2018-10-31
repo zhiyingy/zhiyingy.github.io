@@ -32,7 +32,6 @@ We will be using CUDA when exploiting paralleism. We will train our solver on gh
 [Minimax on Xiangqi](http://stanford.edu/~dengl11/resource/doc/221-Report.pdf)
 
 ### Schedule
-### Schedule
 week 1 (Oct 28th - Nov 3rd): proposal, working environment setup, installation of required packages. <br />
 week 2 (Nov 4th - Nov 10th): implementation of UI.<br />
 week 3 (Nov 11th - Nov 17th): implementation of serial minmax search.<br />
