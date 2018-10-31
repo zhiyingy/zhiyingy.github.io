@@ -14,7 +14,8 @@ For this project, we will implement different types of locks to test the perform
 Synchronization is an important topic in parallelism to ensure the correctness of the program. In class, we learned about different implementations of synchronization such as locks and lock free data structures. Here, we want to compare the performance of different lock implementations and a lock free data structure. We chose AVL tree here because self-balancing binary search trees are an important data structure that are used in many algorithms.
 
 ### Challenges
-
+1. Lock free algorithms for self-balancing trees are not easy to come up with.<br />
+2. Different locks are suitable for different situations, thus we need to design multiple situations to show the tradeoff between locks. (like frequent insertion, infrequent deletes).
 
 ### Goals and Deliverables
 
@@ -22,7 +23,8 @@ plan to achieve: <br />
 · plan to implement different locks. <br />
 · plan to implement a lock free AVL tree data structure. <br />
 
-Hope to achieve
+Hope to achieve: <br />
+Come up with a hybrid model to deal with the tradeoffs of each lock type. <br />
 
 This is an analysis project, and we plan to answer the question of which lock implementation has the best performance on which machines. At the poster session, we want to show the performace of each lock implementation of different machines. 
 
