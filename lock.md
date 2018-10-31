@@ -1,4 +1,4 @@
-## LOCK IMPLEMENTATIONS AND TRANSACTIONAL MEMORY
+## LOCK IMPLEMENTATIONS, LOCK FREE AVL TREE AND TRANSACTIONAL MEMORY
 ### Summary
 
 For this project, we will implement different types of locks to test the performance of different synchronization startegies. Specifically, we will be implementing test-and-set lock, test-and-test-and-set lock, ticket locks, queue-based locks, and test it on AVL tree for search, insert, delete operations. We will also implement a lock free AVL tree and compare the performance.
