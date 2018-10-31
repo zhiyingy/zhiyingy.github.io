@@ -1,20 +1,14 @@
-# Lock-free Self-balancing Binary Search Tree
-## Team Members: Ziyuan Chen (ziyuanc), Ruogu Du (ruogud)
+# Lock Implementations and Lock Free AVL Tree
+## Team Members: Zhiying Yao (zhiyingy), Hongyi Ding (hongyid)
 
 ## Proposal:
 ### Summary
 
-For this project, we will implement a lock-free concurrent self-balancing binary search tree, whose performance will be compared against concurrent binary trees with locks. If there is time left, we will use the binary search tree to implement a lock-free C++ STL.
+For this project, we will implement different types of locks to test the performance of various synchronization primitives. Specifically, we will be implementing test-and-set lock, test-and-test-and-set lock, ticket locks and queue-based locks. If time permitted, we will implement a lock free AVL tree and compare the performance.
 
 ### Background
 
-Self-balancing binary search trees are an important type of data structures used in the underlying implementation of many containers, libraries, and algorithms. Usually, they achieve self-balancing through a certain sequence of rotations when there is a change in the tree while maintaining all BST properties.
-
-If a tree structure is shared among multiple threads, typically in a shared memory address space, the data structure needs to be protected from race conditions. All operations, including insertion, deletion, modification, read, and rotation, need to be atomic. Intuitively, such requirements can be satisfied with locking. However, locks create thread stalls which can hurdle the performance of a parallel program. In this project, we will work on implementing a lock-free version of this data structure.
-
-There are three major variants of self-balancing BSTs that we will consider using. They are AVL trees, red-black trees, and splay trees. They all have their advantages and disadvantages. Because the AVL and the splay tree are relatively easy to implement, we will start from one of them. However, red-black trees are used more frequently in production-level libraries, so we will strive to implement a lock-free version of it as well.
-
-Depending on our schedule, we might work on implementing container classes to achieve a lock-free version of C++ Standard Template Library(STL) using our lock-free self-balancing BSTs. For example, the map<> and set<> classes can benefit from our lock-free trees. Our project, if successful and combined with prior works on lock-free data structures, will result in a lock-free production-level C++ STL.
+Synchronization is an important topic in parallelism to ensure the correctness of the program. In class, we learned about different implementations of synchronization such as locks and lock free data structures. Here, we want to compare the performance of different lock implementations and a lock free data structure. We chose AVL tree here because self-balancing binary search trees are an important data structure that are used in many algorithms.
 
 ### Challenges
 
