@@ -40,11 +40,11 @@ We will choose C++ for its high-performance and completeness and various existin
 [Concurrent Search and Insertion in AVL Trees](https://www.computer.org/csdl/trans/tc/1980/09/01675680.pdf)
 
 ### Schedule
-week 1 (Oct 28th - Nov 3rd): proposal, working environment setup, installation of required packages.
-week 2 (Nov 4th - Nov 10th): implementation of four locks (test and set, test-and-test-and-set, ticket lock, array-based lock).
-week 3 (Nov 11th - Nov 17th): implementation of three locks (queue-based lock, fetch-and-add lock, compare and swap).
-week 4 (Nov 18th - Nov 24th): implementation of lock-free AVL trees.
-week 5 (Nov 25th - Dec 1st): continued implementation of lock-free AVL trees.
-week 6 (Dec 2nd - Dec 8th): test different locks on different machines.
-week 7 (Dec 9th - Dec 15th): final report and presentation.
+week 1 (Oct 28th - Nov 3rd): proposal, working environment setup, installation of required packages. <br />
+week 2 (Nov 4th - Nov 10th): implementation of four locks (test and set, test-and-test-and-set, ticket lock, array-based lock).<br />
+week 3 (Nov 11th - Nov 17th): implementation of three locks (queue-based lock, fetch-and-add lock, compare and swap).<br />
+week 4 (Nov 18th - Nov 24th): implementation of lock-free AVL trees.<br />
+week 5 (Nov 25th - Dec 1st): continued implementation of lock-free AVL trees.<br />
+week 6 (Dec 2nd - Dec 8th): test different locks on different machines.<br />
+week 7 (Dec 9th - Dec 15th): final report and presentation.<br />
 
