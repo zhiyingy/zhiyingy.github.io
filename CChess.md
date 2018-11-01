@@ -1,6 +1,6 @@
 ## Chinese Chess Solver
 ### Summary
-For this project, we will implement a Chinese Chess Solver using Minimax, Alpha-beta Pruning. When implemented, this solver can be used to play against human players. Chinese chess has more complex rules and larger branching factor than Chess, thus it is more challenging to implement. If we have time, we would implement an parallel MonteCarlo Tree Search for the solver.
+For this project, we will implement a Chinese Chess Solver using Minimax, Alpha-beta Pruning. When implemented, we can have this solver play Chinese chess against a human player or itself. Chinese chess has more complex rules and larger branching factor than Chess, thus it is more challenging to implement. If we have time, we would implement an parallel MonteCarlo Tree Search for the solver.
 
 ### Background
 Chinese chess (Xiangqi) is a popular game in China that requires strategies and learnings. It is a two-player, zero-sum game.  It contains two armies, each with seven different types of pieces, and each type has different moving rules. More information about the rules can be found in the link.
@@ -10,7 +10,9 @@ Chinese chess (Xiangqi) is a popular game in China that requires strategies and 
 ### Challenges
 Chinese Chess are complicated, with each type of pieces having their own moving rules. Thus, the workload is nontrivial.
 
-Each move is dependent on the previous move. Therefore, speedup might not be much.
+Each move is dependent on the previous move. Therefore, speedup might be limited.
+
+Integrate GUI on C++.
 
 ### Goals and Deliverables
 
