@@ -1,6 +1,6 @@
 # Lock Implementations and Lock Free AVL Tree
-### Team Member: 
-Zhiying Yao (zhiyingy)
+### Team Members: 
+Zhiying Yao (zhiyingy), Hongyi Ding(hongyid)
 
 ## Final Report
 [final report](https://github.com/zhiyingy/zhiyingy.github.io/blob/zhiyingy-proposal/final.md)
