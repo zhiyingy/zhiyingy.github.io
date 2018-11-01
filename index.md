@@ -1,4 +1,4 @@
-# Lock Implementations and Lock Free AVL Tree
+# 15-418 Final project
 ### Team Members: 
 Zhiying Yao (zhiyingy), Hongyi Ding (hongyid)
 
