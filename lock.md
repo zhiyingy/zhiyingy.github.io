@@ -16,6 +16,7 @@ Synchronization is an important topic in parallelism to ensure the correctness o
 plan to achieve: <br />
 · plan to implement different locks. <br />
 · plan to implement a lock free AVL tree data structure. <br />
+· plan to implement alternatives like transactional memory.
 
 Hope to achieve: <br />
 Come up with a hybrid model to deal with the tradeoffs of each lock type. <br />
@@ -36,10 +37,10 @@ We will choose C++ for its high-performance and completeness and various existin
 
 ### Schedule
 week 1 (Oct 28th - Nov 3rd): proposal, working environment setup, installation of required packages. <br />
-week 2 (Nov 4th - Nov 10th): implementation of four locks (test and set, test-and-test-and-set, ticket lock, array-based lock).<br />
-week 3 (Nov 11th - Nov 17th): implementation of three locks (queue-based lock, fetch-and-add lock, compare and swap).<br />
+week 2 (Nov 4th - Nov 10th): implementation of locks.<br />
+week 3 (Nov 11th - Nov 17th): test locks on different machines with different thread counts.<br />
 week 4 (Nov 18th - Nov 24th): implementation of lock-free AVL trees.<br />
 week 5 (Nov 25th - Dec 1st): continued implementation of lock-free AVL trees.<br />
-week 6 (Dec 2nd - Dec 8th): test different locks on different machines.<br />
+week 6 (Dec 2nd - Dec 8th): implementation of alternatives like transactional memory.<br />
 week 7 (Dec 9th - Dec 15th): final report and presentation.<br />
 
