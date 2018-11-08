@@ -1,11 +1,10 @@
-# 15-418 Final project
+# LOCK-FREE AVL TREES
 ### Team Members: 
 Zhiying Yao (zhiyingy), Hongyi Ding (hongyid)
 
 ## Final Report
 [final report](https://github.com/zhiyingy/zhiyingy.github.io/blob/zhiyingy-proposal/final.md)
 
-## LOCK-FREE AVL TREES
 ### Summary
 
 For this project, we will first implement lock-free AVL trees, which support search, insert, and delete operations. We will also implement AVL trees with different locking mechanisms, and do comparative analysis of these implementations. 
