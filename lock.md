@@ -1,4 +1,4 @@
-## LOCK IMPLEMENTATIONS, LOCK FREE AVL TREE AND TRANSACTIONAL MEMORY
+## LOCK-FREE AVL TREES
 ### Summary
 
 For this project, we will first implement lock-free AVL trees, which support search, insert, and delete operations. We will also implement AVL trees with different locking mechanisms, and do comparative analysis of these implementations. 
