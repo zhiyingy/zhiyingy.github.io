@@ -33,7 +33,8 @@ This is an analysis project, and we plan to answer the question of which lock im
 We will choose C++ for its high-performance and completeness and various existing C++ based parallel libraries. We will test our lock implementations on differnt machines (latedays, latedays phi, mac os, ghc machines) to see which locking mechanism has the best performance on which machines.
 
 ### Resources
-[Fast Concurrent AVL trees](https://spcl.inf.ethz.ch/Teaching/2013-dphpc/final/8.pdf)
+[A Practical Concurrent Binary Search Tree](https://stanford-ppl.github.io/website/papers/ppopp207-bronson.pdf)
+[Lock-Free Red-Black Trees Using CAS](https://www.cs.umanitoba.ca/~hacamero/Research/RBTreesKim.pdf)
 
 ### Schedule
 week 1 (Oct 28th - Nov 3rd): proposal, working environment setup, installation of required packages. <br />
