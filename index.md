@@ -45,5 +45,5 @@ week 5 (Nov 25th - Dec 1st): continued implementation of AVL trees using differe
 week 6 (Dec 2nd - Dec 8th): comparative analysis of different implementations of AVL trees. <br />
 week 7 (Dec 9th - Dec 15th): final report and presentation.<br />
 
-
-
+## Checkpoint
+[Checkpoint](https://github.com/zhiyingy/zhiyingy.github.io/blob/master/checkpoint.md)
