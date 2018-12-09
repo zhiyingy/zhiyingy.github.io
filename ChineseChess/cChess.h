@@ -26,6 +26,8 @@ typedef struct move_t {
 } move;
 
 bool isValidMove(int board[10][9],int sr, int sc, int er, int ec);
+int gameOver(int board[10][9]);
+int flipPlayer(int curPlayer);
 
 // class Move
 // {

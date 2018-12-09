@@ -3,17 +3,25 @@
 
 #include "cChess.h"
 
-#define POSINF 19990
-#define NEGINF -19990
-
 #define MAX 1
 #define MIN -1
 
 #define MAX_DEPTH 7
 
+typedef struct minimaxResult_t {
+  int bestRes;
+  move *mv;
+} minimaxResult;
 
-move calculateStep(int board[10][9], int aiType, int curPlayer);
+typedef struct movesWithPlayer_t {
+    move *mv;
+    int player;
+    int startPiece;
+    int endPiece;
+} movesWithPlayer;
+
+move *calculateStep(int board[10][9], int curPlayer);
 void makeMove (int board[10][9], int sr, int sc, int er, int ec);
-bool gameOver(int board[10][9], int depth);
+// int gameOver(int board[10][9], int depth);
 
 #endif

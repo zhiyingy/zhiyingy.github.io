@@ -1,7 +1,8 @@
 APP_NAME=cChess
 
-OBJS +=cChess.o
+OBJS += cChess.o
 OBJS += alphabeta.o
+OBJS += evaluate.o
 
 default: $(APP_NAME)
 
