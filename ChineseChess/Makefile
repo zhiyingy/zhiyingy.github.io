@@ -1,6 +1,7 @@
 APP_NAME=cChess
 
-OBJS=cChess.o
+OBJS +=cChess.o
+OBJS += alphabeta.o
 
 default: $(APP_NAME)
 
@@ -23,4 +24,3 @@ cpu: $(OBJS)
 # $< = first prerequisite
 # $@ = target
 # $^ = all prerequisite
-

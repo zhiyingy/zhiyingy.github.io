@@ -17,35 +17,49 @@
 #define PAO 4
 #define ZU 7
 
-typedef struct player_t
-{
-  /* Define the data structure for wire here */
-	
-} Player;
+typedef struct move_t {
+  // x cols, y rows
+  int sr;
+  int sc;
+  int er;
+  int ec;
+} move;
 
-typedef struct move_t
-{
-    
-} Move;
+bool isValidMove(int board[10][9],int sr, int sc, int er, int ec);
 
-class ChessPiece
-{
-    private:
-        int type;
-        int row;
-        int col;
-        int player;
-        bool dead;
-    public:
-        void setVal(int t, int r, int c, int p);
-        int getRow();
-        int getCol();
-        void setPosition(int r, int c);
-        void generateMoves(std::vector<Move>);
-        bool isdead();
-        void setDead();
-        int getType();
-        int getPlayer();
-};
+// class Move
+// {
+//     private:
+//         int sr;
+//         int sc;
+//         int er;
+//         int ec;
+//     public:
+//         Move(int startR, int startC, int endR, int endC);
+//         int getsr();
+//         int getsc();
+//         int geter();
+//         int getec();
+// };
+
+// class ChessPiece
+// {
+//     private:
+//         int type;
+//         int row;
+//         int col;
+//         int player;
+//         bool dead;
+//     public:
+//         void setVal(int t, int r, int c, int p);
+//         int getRow();
+//         int getCol();
+//         void setPosition(int r, int c);
+//         void generateMoves(std::vector<Move>);
+//         bool isdead();
+//         void setDead();
+//         int getType();
+//         int getPlayer();
+// };
 
 #endif
