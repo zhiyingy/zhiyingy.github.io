@@ -3,17 +3,7 @@
 #include "alphabeta.h"
 #include <limits.h>
 
-// int getZuValue(int board[10][9], int r, int c){
-//     if (board[r][c] == RED * ZU){
-//         return RZUPLUS[r][c];
-//     }
-//     if (board[r][c] == BLACK * ZU){
-//         return BZUPLUS[r][c];
-//     }
-//     return 0;
-// }
-
-int evaluate(int board[10][9], int curPlayer){
+int evaluate(int **board, int curPlayer){
     int redTo = 0;
     int blackTo = 0;
     bool blackAlive = false;

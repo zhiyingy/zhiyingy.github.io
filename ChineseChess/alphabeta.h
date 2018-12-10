@@ -20,8 +20,6 @@ typedef struct movesWithPlayer_t {
     int endPiece;
 } movesWithPlayer;
 
-move *calculateStep(int board[10][9], int curPlayer);
-void makeMove (int board[10][9], int sr, int sc, int er, int ec);
-// int gameOver(int board[10][9], int depth);
+move *calculateStepAB(int **board, int curPlayer);
 
 #endif

@@ -1,8 +1,10 @@
 APP_NAME=cChess
 
 OBJS += cChess.o
-OBJS += alphabeta.o
 OBJS += evaluate.o
+OBJS += montecarlo.o
+OBJS += generateMove.o
+OBJS += parallelab.o
 
 default: $(APP_NAME)
 
@@ -20,6 +22,8 @@ cpu: $(OBJS)
 %.o: %.cpp
 	$(CXX) $< $(CXXFLAGS) -c -o $@
 
+clean:
+	rm -f $(APP_NAME) *.o
 
 # For a given rule:
 # $< = first prerequisite

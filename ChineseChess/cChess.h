@@ -17,6 +17,9 @@
 #define PAO 4
 #define ZU 7
 
+#define MCST 0
+#define AB 1
+
 typedef struct move_t {
   // x cols, y rows
   int sr;
@@ -25,8 +28,10 @@ typedef struct move_t {
   int ec;
 } move;
 
-bool isValidMove(int board[10][9],int sr, int sc, int er, int ec);
-int gameOver(int board[10][9]);
+bool isValidMove(int **board,int sr, int sc, int er, int ec);
+void makeMove (int **board, int sr, int sc, int er, int ec);
+void unmakeMove (int **board, int sr, int sc, int er, int ec, int piece);
+int gameOver(int **board);
 int flipPlayer(int curPlayer);
 
 // class Move

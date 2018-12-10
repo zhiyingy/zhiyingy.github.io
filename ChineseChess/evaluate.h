@@ -9,15 +9,7 @@
 #define B_PAO 285
 
 #define POSINF INT_MAX-1
-#define NEGINF INT_MIN+1 
-
-// #define F_ZU 15
-// #define F_SHI 1
-// #define F_XIANG 1
-// #define F_JU 6
-// #define F_MA 12
-// #define F_PAO 6
-// #define F_SHUAI 0
+#define NEGINF INT_MIN+1
 
 const int RZUPLUS[10][9] = {  0,  3,  6,  9, 12,  9,  6,  3,  0,
                              18, 36, 56, 80,120, 80, 56, 36, 18,
@@ -107,6 +99,6 @@ const int RPAOPLUS[10][9] = { 6,  4,  0,-10,-12,-10,  0,  4,  6,
                               0,  2,  4,  6,  6,  6,  4,  2,  0,
                               0,  0,  2,  6,  6,  6,  2,  0,  0};
 
-int evaluate(int board[10][9], int curPlayer);
+int evaluate(int **board, int curPlayer);
 
 #endif

@@ -6,10 +6,31 @@
 #include <iostream>
 #include "lib/CycleTimer.h"
 #include "alphabeta.h"
+#include "montecarlo.h"
 using namespace std;
 
 #include "cChess.h"
 #include "alphabeta.h"
+
+static int _argc;
+static const char **_argv;
+
+const char *get_option_string(const char *option_name,
+            const char *default_value)
+{
+    for (int i = _argc - 2; i >= 0; i -= 2)
+        if (strcmp(_argv[i], option_name) == 0)
+            return _argv[i + 1];
+    return default_value;
+}
+
+int get_option_int(const char *option_name, int default_value)
+{
+    for (int i = _argc - 2; i >= 0; i -= 2)
+        if (strcmp(_argv[i], option_name) == 0)
+            return atoi(_argv[i + 1]);
+    return default_value;
+}
 
 int flipPlayer(int curPlayer){
     if (curPlayer == RED){
@@ -18,8 +39,20 @@ int flipPlayer(int curPlayer){
     return RED;
 }
 
+//return the eaten piece
+void makeMove (int **board, int sr, int sc, int er, int ec){
+    int piece = board[er][ec];
+    board[er][ec] = board[sr][sc];
+    board[sr][sc] = 0;
+}
+
+void unmakeMove (int **board, int sr, int sc, int er, int ec, int piece){
+    board[sr][sc] = board[er][ec];
+    board[er][ec] = piece;
+}
+
 //return the winner
-int gameOver(int board[10][9]) {
+int gameOver(int **board) {
     bool redAlive = false;
     bool blackAlive = false;
     int i, j;
@@ -52,7 +85,7 @@ int gameOver(int board[10][9]) {
     return 0;
 }
 
-void printBoard(int board[10][9]){
+void printBoard(int **board){
     for (int r = 0; r < 10; r++) {
         for (int j = 0; j < 9; j++) {
             if (board[r][j] >= 0){
@@ -64,7 +97,7 @@ void printBoard(int board[10][9]){
     }
 }
 
-bool isValidMove(int board[10][9],int sr, int sc, int er, int ec){
+bool isValidMove(int **board,int sr, int sc, int er, int ec){
     if (er == sr && ec == sc) {
         //cannot donnot move
         return false;
@@ -283,23 +316,87 @@ bool isValidMove(int board[10][9],int sr, int sc, int er, int ec){
     return true;
 }
 
+void initializeBoard(int **board){
+    // int **board = { 2, 3, 6, 5, 1, 5, 6, 3, 2,
+    //                 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                 0, 4, 0, 0, 0, 0, 0, 4, 0,
+    //                 7, 0, 7, 0, 7, 0, 7, 0, 7,
+    //                 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                -7, 0,-7, 0,-7, 0,-7, 0,-7,
+    //                 0,-4, 0, 0, 0, 0, 0,-4, 0,
+    //                 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    //                -2,-3,-6,-5,-1,-5,-6,-3,-2};
 
-int main() {
-    // #ifdef OMP
-    //     omp_set_num_threads(OMPNUMTHREADS);
-    // #endif
+    for (int i = 0; i < 10; i++){
+        for (int j = 0; j < 9; j++){
+            board[i][j] = 0;
+        }
+    }
+    board[0][0]=2;
+    board[0][1]=3;
+    board[0][2]=6;
+    board[0][3]=5;
+    board[0][4]=1;
+    board[0][5]=5;
+    board[0][6]=6;
+    board[0][7]=3;
+    board[0][8]=2;
+
+    board[2][1]=4;
+    board[2][7]=4;
+
+    board[3][0]=7;
+    board[3][2]=7;
+    board[3][4]=7;
+    board[3][6]=7;
+    board[3][8]=7;
+
+    board[6][0]=-7;
+    board[6][2]=-7;
+    board[6][4]=-7;
+    board[6][6]=-7;
+    board[6][8]=-7;
+
+    board[7][1]=-4;
+    board[7][7]=-4;
+
+    board[9][0]=-2;
+    board[9][1]=-3;
+    board[9][2]=-6;
+    board[9][3]=-5;
+    board[9][4]=-1;
+    board[9][5]=-5;
+    board[9][6]=-6;
+    board[9][7]=-3;
+    board[9][8]=-2;
+}
+
+
+int main(int argc, const char *argv[]) {
     double startTime, endTime, timeUsed;
     int piece;
-    int board[10][9] = { 2, 3, 6, 5, 1, 5, 6, 3, 2,
-                         0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 4, 0, 0, 0, 0, 0, 4, 0,
-                         7, 0, 7, 0, 7, 0, 7, 0, 7,
-                         0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        -7, 0,-7, 0,-7, 0,-7, 0,-7,
-                         0,-4, 0, 0, 0, 0, 0,-4, 0,
-                         0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        -2,-3,-6,-5,-1,-5,-6,-3,-2};
+    int aiType;
+    move *mB;
+    _argc = argc - 1;
+    _argv = argv + 1;
+
+    const char *algo_type = get_option_string("-m", NULL);
+    int num_of_threads = get_option_int("-n", 1);
+
+    if (algo_type[0] == 'm'){
+        aiType = MCST;
+    } else{
+        aiType = AB;
+    }
+
+    omp_set_num_threads(num_of_threads);
+
+    int **board = (int **)malloc(10 * sizeof(int *));
+    for (int i=0; i<10; i++) {
+        board[i] = (int *)malloc(9 * sizeof(int));
+    }
+    initializeBoard(board);
 
     int user_move[4];
 
@@ -327,15 +424,21 @@ int main() {
 
         startTime = CycleTimer::currentSeconds();
         curPlayer = BLACK;
-        move *mB = calculateStep(board, curPlayer);
-        timeUsed = (endTime - startTime) * 1000.f;
+        if (aiType == AB){
+            mB = calculateStepAB(board, curPlayer);
+        }else{
+            mB = calculateStepMC(board, curPlayer);
+        }
+        endTime = CycleTimer::currentSeconds();
+
+        timeUsed = (endTime - startTime)*1000.f;
         cout << "AI (B) decided to move from " << mB->sr << "," << mB->sc;
         cout << " to "<<mB->er << "," << mB->ec <<" with time = " << timeUsed << "ms\n";
         makeMove(board, mB->sr, mB->sc, mB->er, mB->ec);
         printBoard(board);
         curPlayer = RED;
     }
-    
+    cout << "BLACK Wins!";
     
     return 1;
 }
