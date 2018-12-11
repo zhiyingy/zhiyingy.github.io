@@ -3,9 +3,6 @@
 
 #include "cChess.h"
 
-#define MAX 1
-#define MIN -1
-
 #define MAX_DEPTH 7
 
 typedef struct minimaxResult_t {

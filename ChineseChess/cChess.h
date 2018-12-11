@@ -1,9 +1,6 @@
 #ifndef __CCHESS_H__
 #define __CCHESS_H__
 
-#include <omp.h>
-#include <vector>
-
 #define BOARD_WIDTH 9
 #define BOARD_HEIGHT 10
 #define RED -1
