@@ -3,7 +3,7 @@
 #include "evaluate.h"
 #include "generateMove.h"
 #include <math.h>
-#include <std::vector<char> v;>
+#include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
