@@ -141,10 +141,6 @@ minimaxResult *maxi(int curDepth, int maxDepth, int alpha, int beta,
 
     for (std::vector<move*>::iterator it = possibleMoves.begin(); it != possibleMoves.end(); it++) {
         move *curMove = *it;
-        // if (curMove -> ec < 0){
-        //     std::cout << "wholy shit\n";
-        // }
-
 
         std::vector<movesWithPlayer*> curMovesList = movesList;
         movesWithPlayer *mp = (movesWithPlayer *)calloc(1,sizeof(movesWithPlayer));
