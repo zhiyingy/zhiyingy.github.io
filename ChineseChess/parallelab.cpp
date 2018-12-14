@@ -54,7 +54,7 @@ minimaxResult *seqABP(int curDepth, int maxDepth, int alpha, int beta,
     for (std::vector<move*>::iterator it = possibleMoves.begin(); it != possibleMoves.end(); it++) {
         move *curMove = *it;
         int startPiece = board[curMove->sr][curMove->sc];
-        int endPiece = endPiece = board[curMove->er][curMove->ec];
+        int endPiece = board[curMove->er][curMove->ec];
 
         makeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec);
 

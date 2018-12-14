@@ -3,6 +3,7 @@
 #include "evaluate.h"
 #include "generateMove.h"
 #include <math.h>
+#include <iostream>
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +25,7 @@ movesMC *newMcNode(movesMC *parent, move *mv, int **board, int curPlayer) {
     node -> score = 0.0;
     node -> mv = mv;
     node -> parent = parent;
+    std::cout << node->possibleMoves.size() << "\n";
     return node;
 }
 
@@ -46,7 +48,9 @@ movesMC *ucbBestChild(movesMC *node, double c) {
 
 movesMC *search(int **board, movesMC *root, int curPlayer) {
     movesMC *node = root;
-    makeMove(board, node->mv->sr, node->mv->sc, node->mv->er, node->mv->ec);
+    if (node->mv != NULL) {
+        makeMove(board, node->mv->sr, node->mv->sc, node->mv->er, node->mv->ec);
+    }
     while (gameOver(board) == 0){
         if (node->nextIndex != node->possibleMoves.size()){
             movesMC *child = newMcNode(root, 
@@ -74,25 +78,33 @@ move *mcts(int **board, int curPlayer, int simulations){
     int **copyBoard;
     movesMC *root = newMcNode(NULL, NULL, board, curPlayer);
 
-    // copyBoard = (int **)malloc(10 * sizeof(int *));
-    // for (int i = 0; i < 10; i++){
-    //     copyBoard[i] = (int *)malloc(9 * sizeof(int));
-    // }
+    copyBoard = (int **)malloc(10 * sizeof(int *));
+    for (int i = 0; i < 10; i++){
+        copyBoard[i] = (int *)malloc(9 * sizeof(int));
+    }
 
-    // for (int i = 0; i < simulations; i++) {
-    //     deepCopyBoard(board, copyBoard);
-    //     movesMC *leaf = search(copyBoard, root, curPlayer);
-    //     int result = evaluate(board, curPlayer);
-    //     back(leaf, result);
-    // }
+    for (int i = 0; i < simulations; i++) {
+        deepCopyBoard(board, copyBoard);
+        movesMC *leaf = search(copyBoard, root, curPlayer);
+        // int result = evaluate(board, curPlayer);
+        // back(leaf, result);
+    }
 
-    // for (int i = 0; i < 10; i++){
-    //     free(copyBoard[i]);
-    // }
-    // free(copyBoard);
-    return ucbBestChild(root, 0.0)->mv;
+    for (int i = 0; i < 10; i++){
+        free(copyBoard[i]);
+    }
+    free(copyBoard);
+    return NULL;
+    // return ucbBestChild(root, 0.0)->mv;
 }
 
 move *calculateStepMC(int **board, int curPlayer){
-    return mcts(board, curPlayer, SIM);
+    mcts(board, curPlayer, 40);
+    move *mv = (move*)malloc(sizeof(move));
+    mv->sr = 0;
+    mv->er = 0;
+    mv->sc = 0;
+    mv->ec = 0;
+    return mv;
+    // return mcts(board, curPlayer, SIM);
 }
