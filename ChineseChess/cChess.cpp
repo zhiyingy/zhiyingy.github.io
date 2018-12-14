@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string>
 #include <stdlib.h>
-// #include <omp.h>
+#include <omp.h>
 #include <cstring>
 #include <iostream>
 #include "lib/CycleTimer.h"
@@ -390,7 +390,7 @@ int main(int argc, const char *argv[]) {
         aiType = AB;
     }
 
-    // omp_set_num_threads(num_of_threads);
+    omp_set_num_threads(num_of_threads);
 
     int **board = (int **)malloc(10 * sizeof(int *));
     for (int i=0; i<10; i++) {

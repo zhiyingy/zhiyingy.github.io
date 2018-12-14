@@ -105,33 +105,12 @@ minimaxResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
 
     move *bestMove = NULL;
 
-    move *firstMove = possibleMoves.at(0);
-    int startPiece = board[firstMove->sr][firstMove->sc];
-    int endPiece = board[firstMove->er][firstMove->ec];
-    makeMove(board, firstMove->sr, firstMove->sc, firstMove->er, firstMove->ec);
-    minimaxResult *firstRes = firstMoveSearch(curDepth + 1, maxDepth, -beta, -alpha, board, flipPlayer(curPlayer));
-    firstRes->bestRes = -(firstRes->bestRes);
-    int resS = firstRes->bestRes;
-    unmakeMove(board, firstMove->sr, firstMove->sc, firstMove->er, firstMove->ec, endPiece);
-    
-    if (resS > beta) {
-        free(firstRes);
-        minimaxResult *res = (minimaxResult *)malloc(sizeof(minimaxResult));
-        res->bestRes = beta;
-        res->mv = bestMove;
-        return res;
-    }
-    if (alpha < resS) {
-        bestMove = firstMove;
-        alpha = resS;
-    }
-
-    if (int(possibleMoves.size()) > 1)  {
+    if (int(possibleMoves.size()) > 0)  {
         volatile bool flag = false;
         int i;
-        #pragma omp parallel for default(shared) shared(flag, alpha, bestMove) private(i) schedule(dynamic)
-        for (i = 1; i < possibleMoves.size(); i++) {
-
+        double totalTime = 0.0;
+        #pragma omp parallel for default(shared) shared(flag, alpha, bestMove, totalTime) private(i) schedule(dynamic)
+        for (i = 0; i < possibleMoves.size(); i++) {
             if (flag) {
                 continue;
             }
@@ -139,14 +118,16 @@ minimaxResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
                 move *curMove = possibleMoves.at(i);
                 int startPiece = board[curMove->sr][curMove->sc];
                 int endPiece = board[curMove->er][curMove->ec];
-
+                double startTime = CycleTimer::currentSeconds();
                 int **boardCopy = deepCopyBoard(board);
+                totalTime += CycleTimer::currentSeconds()-startTime;
                 // we know curMove is valid
                 makeMove(boardCopy, curMove->sr, curMove->sc, curMove->er, curMove->ec);
                 minimaxResult *curRes = seqABP(curDepth + 1, maxDepth, -beta, -alpha, boardCopy, flipPlayer(curPlayer));
                 int resS = -(curRes->bestRes);
+                startTime = CycleTimer::currentSeconds();
                 deepFreeBoard(boardCopy);
-
+                totalTime += CycleTimer::currentSeconds()-startTime;
                 if (resS >= beta) {
                     free(curRes);
                     minimaxResult *res = (minimaxResult*)malloc(sizeof(minimaxResult));
@@ -162,6 +143,7 @@ minimaxResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
                 free(curRes);
             }
         }
+        std::cout << "allocation time = " << totalTime*1000 << "\n";
     }
     minimaxResult *res = (minimaxResult *)malloc(sizeof(minimaxResult));
     res->bestRes = alpha;
@@ -177,5 +159,4 @@ move *calculateStepAB(int **board, int curPlayer) {
     move *m = res->mv;
     free(res);
     return m;
-  // return NULL;
 }

@@ -3,8 +3,7 @@
 #include "cChess.h"
 #include <vector>
 
-#define EXP_RATE = 12000;
-#define SIM = 1000;
+#define SIM 1000
 
 move *calculateStepMC(int **board, int curPlayer);
 

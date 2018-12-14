@@ -34,7 +34,7 @@ movesMC *ucbBestChild(movesMC *node, double c) {
     double maxValue = -DBL_MAX;;
     for (int i = 0; i < node->children.size(); i++) {
         movesMC *child = node->children.at(i);
-        curVal = (children->score/children->nextIndex);
+        curVal = (child->score/child->nextIndex);
         curVal += c*sqrt(2*log(node->nextIndex/child->nextIndex));
         if (curVal > maxValue){
             maxValue = curVal;
@@ -62,7 +62,7 @@ movesMC *search(int **board, movesMC *root, int curPlayer) {
 
 void back(movesMC *node, int result){
     float sum_score = node->score;
-    while (!node->parent == NULL) {
+    while (node->parent != NULL) {
         node->score += sum_score;
         node = node->parent;
     }
@@ -71,30 +71,28 @@ void back(movesMC *node, int result){
 
 move *mcts(int **board, int curPlayer, int simulations){
     std::vector<move*> possibleMoves;
-    std::vector<movesMC*> movesList;
     int **copyBoard;
     movesMC *root = newMcNode(NULL, NULL, board, curPlayer);
 
-    copyBoard = (int **)malloc(10 * sizeof(int *));
-    for (int i = 0; i < 10; i++){
-        copyBoard[i] = (int *)malloc(9 * sizeof(int));
-    }
+    // copyBoard = (int **)malloc(10 * sizeof(int *));
+    // for (int i = 0; i < 10; i++){
+    //     copyBoard[i] = (int *)malloc(9 * sizeof(int));
+    // }
 
-    for (int i = 0; i < simulations; i++) {
-        deepCopyBoard(board, copyBoard);
-        movesMC *leaf = search(copyBoard, root, curPlayer);
-        int result = evaluate(board, curPlayer);
-        back(leaf, result);
-    }
+    // for (int i = 0; i < simulations; i++) {
+    //     deepCopyBoard(board, copyBoard);
+    //     movesMC *leaf = search(copyBoard, root, curPlayer);
+    //     int result = evaluate(board, curPlayer);
+    //     back(leaf, result);
+    // }
 
-    for (int i = 0; i < 10; i++){
-        free(copyBoard[i]);
-    }
-    free(copyBoard);
+    // for (int i = 0; i < 10; i++){
+    //     free(copyBoard[i]);
+    // }
+    // free(copyBoard);
     return ucbBestChild(root, 0.0)->mv;
 }
 
 move *calculateStepMC(int **board, int curPlayer){
-    // std::vector<movesMC*> movesList;
-    return NULL;
+    return mcts(board, curPlayer, SIM);
 }
