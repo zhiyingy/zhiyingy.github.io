@@ -165,12 +165,13 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
             }
             break;
         }case SHI * BLACK: {
-            if (er >2 || ec > 5 || ec < 3) {
+            if (er > 2 || ec > 5 || ec < 3) {
                 return false;
             }
             if (abs(sr - er) != 1 || abs(ec-sc) != 1){
                 return false;
             }
+            break;
         }case XIANG * RED: {
             //XIANG
             if (er < 5){
@@ -403,6 +404,25 @@ int main(int argc, const char *argv[]) {
     printBoard(board);
     int curPlayer = RED; //red, bottom half with negative values
     while (gameOver(board)==0) {
+        startTime = CycleTimer::currentSeconds();
+        if (aiType == AB){
+            mB = calculateStepAB(board, curPlayer);
+        }else{
+            mB = calculateStepMC(board, curPlayer);
+        }
+        endTime = CycleTimer::currentSeconds();
+
+        timeUsed = (endTime - startTime)*1000.f;
+        cout << "AI (R) decided to move from " << mB->sr << "," << mB->sc;
+        cout << " to "<<mB->er << "," << mB->ec <<" with time = " << timeUsed << "ms\n";
+        makeMove(board, mB->sr, mB->sc, mB->er, mB->ec);
+        free(mB);
+        printBoard(board);
+        if (gameOver(board) == RED){
+            cout << "Red Wins!\n";
+            return 1;
+        }
+        curPlayer = BLACK;
         while (true) {
             cout << "enter your move of 4 numbers, space separated: ";
             // user inputs values space separated in one line.  Inputs more than the count are discarded.
@@ -417,28 +437,9 @@ int main(int argc, const char *argv[]) {
             }
         }
         printBoard(board);
-        if (gameOver(board) == RED){
-            cout << "Red Wins!";
-            return 1;
-        }
-
-        startTime = CycleTimer::currentSeconds();
-        curPlayer = BLACK;
-        if (aiType == AB){
-            mB = calculateStepAB(board, curPlayer);
-        }else{
-            mB = calculateStepMC(board, curPlayer);
-        }
-        endTime = CycleTimer::currentSeconds();
-
-        timeUsed = (endTime - startTime)*1000.f;
-        cout << "AI (B) decided to move from " << mB->sr << "," << mB->sc;
-        cout << " to "<<mB->er << "," << mB->ec <<" with time = " << timeUsed << "ms\n";
-        makeMove(board, mB->sr, mB->sc, mB->er, mB->ec);
-        printBoard(board);
         curPlayer = RED;
     }
-    cout << "BLACK Wins!";
+    cout << "BLACK Wins!\n";
     
     return 1;
 }

@@ -6,19 +6,17 @@
 int evaluate(int **board, int curPlayer){
     int redTo = 0;
     int blackTo = 0;
-    bool blackAlive = false;
-    bool redAlive = false;
     int i, j, piece;
     for (i=0; i<10; i++){
         for (j=0; j<9; j++){
-            if (board[i][j]==0){
+            if (board[i][j]!=0){
                 piece = board[i][j];
                 switch(piece){
                     case SHUAI * RED:{
-                        redAlive = true;
+                        redTo += B_SHUAI;
                         break;
                     }case SHUAI * BLACK:{
-                        blackAlive = true;
+                        blackTo += B_SHUAI;
                         break;
                     }case SHI * RED:{
                         redTo = redTo + B_SHI;
@@ -33,28 +31,28 @@ int evaluate(int **board, int curPlayer){
                         blackTo = blackTo + B_XIANG;
                         break;
                     }case MA * RED:{
-                        redTo = redTo + B_MA + RMAPLUS[i][j];
+                        redTo = redTo + B_MA;
                         break;
                     }case MA * BLACK:{
-                        blackTo = blackTo + B_MA + BMAPLUS[i][j];
+                        blackTo = blackTo + B_MA;
                         break;
                     }case JU * RED:{
-                        redTo = redTo + B_JU + RJUPLUS[i][j];
+                        redTo = redTo + B_JU;
                         break;
                     }case JU * BLACK:{
-                        blackTo = blackTo + B_JU + BJUPLUS[i][j];
+                        blackTo = blackTo + B_JU;
                         break;
                     }case PAO * RED:{
-                        redTo = redTo + B_PAO + RPAOPLUS[i][j];
+                        redTo = redTo + B_PAO;
                         break;
                     }case PAO * BLACK:{
-                        blackTo = blackTo + B_PAO + BPAOPLUS[i][j];
+                        blackTo = blackTo + B_PAO;
                         break;
                     }case ZU * RED:{
-                        redTo = redTo + B_ZU + RZUPLUS[i][j];
+                        redTo = redTo + B_ZU;
                         break;
                     }case ZU * BLACK:{
-                        blackTo = blackTo + B_ZU + BZUPLUS[i][j];
+                        blackTo = blackTo + B_ZU;
                         break;
                     }
                 }
@@ -62,20 +60,7 @@ int evaluate(int **board, int curPlayer){
         }
     }
     if (curPlayer == RED){
-        if (!blackAlive){
-            return POSINF;
-        }
-        if (!redAlive){
-            return NEGINF;
-        }
         return redTo - blackTo;
-    }
-
-    if (!blackAlive){
-        return NEGINF;
-    }
-    if (!redAlive){
-        return POSINF;
     }
     return blackTo - redTo;
 }

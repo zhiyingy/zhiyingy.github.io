@@ -76,6 +76,7 @@ minimaxResult *seqABP(int curDepth, int maxDepth, int alpha, int beta,
             bestMove = curMove;
             alpha = resS;
         }
+        free(curRes->mv);
         free(curRes);
     }
 
@@ -98,7 +99,7 @@ minimaxResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
     }
 
     std::vector<move *> possibleMoves = generateAllMoves(board, curPlayer);
-
+    // std::cout << "possibleMoves " << possibleMoves.size() << "\n";
     if (curDepth == 0) {
         std::random_shuffle(possibleMoves.begin(), possibleMoves.end());
     }
@@ -144,10 +145,11 @@ minimaxResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
                 // we know curMove is valid
                 makeMove(boardCopy, curMove->sr, curMove->sc, curMove->er, curMove->ec);
                 minimaxResult *curRes = seqABP(curDepth + 1, maxDepth, -beta, -alpha, boardCopy, flipPlayer(curPlayer));
-                int resS = -(curRes->bestRes);
+                curRes->bestRes = -curRes->bestRes;
+                int sres = curRes->bestRes;
                 deepFreeBoard(boardCopy);
 
-                if (resS >= beta) {
+                if (sres >= beta) {
                     free(curRes);
                     minimaxResult *res = (minimaxResult*)malloc(sizeof(minimaxResult));
                     res->bestRes = beta;
@@ -155,10 +157,11 @@ minimaxResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
                     flag = true;
                 }
             #pragma omp critical
-                if (alpha < resS) {
+                if (alpha < sres) {
                     bestMove = curMove;
                     alpha = curRes->bestRes;
                 }
+                free(curRes->mv);
                 free(curRes);
             }
         }

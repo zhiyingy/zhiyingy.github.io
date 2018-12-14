@@ -1,12 +1,13 @@
 #ifndef _EVALUATE_H_
 #define _EVALUATE_H_
 
-#define B_ZU 30
-#define B_SHI 120
-#define B_XIANG 120
-#define B_JU 600
-#define B_MA 270
-#define B_PAO 285
+#define B_ZU 2
+#define B_SHI 2
+#define B_XIANG 2
+#define B_JU 8
+#define B_MA 4
+#define B_PAO 5
+#define B_SHUAI 2000
 
 #define POSINF INT_MAX-1
 #define NEGINF INT_MIN+1
