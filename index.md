@@ -1,4 +1,4 @@
-# LOCK-FREE AVL TREES
+# Chinese Chess AI
 ### Team Members: 
 Zhiying Yao (zhiyingy), Hongyi Ding (hongyid)
 
