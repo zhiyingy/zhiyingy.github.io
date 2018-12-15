@@ -6,7 +6,7 @@
 #include "generateMove.h"
 
 void addMove(int r, int c, int x, int y, std::vector<move*>* possibleMoves){
-    move *curMove = (move *)calloc(1, sizeof(move));
+    move *curMove = (move *)malloc(sizeof(move));
     if (r < 0 || c < 0 || x < 0 || y < 0 || x > 9 || y > 8){
         std::cout << "why\n";
         return;
