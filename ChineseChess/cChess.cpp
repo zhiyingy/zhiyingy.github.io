@@ -6,216 +6,240 @@
 #include <iostream>
 #include "lib/CycleTimer.h"
 #include "alphabeta.h"
+#include "montecarlo.h"
 using namespace std;
 
 #include "cChess.h"
+#include "alphabeta.h"
 
-void ChessPiece::setVal(int t, int r, int c, int p) {
-    type = t;
-    row = r;
-    col = c;
-    player = p;
-}
+static int _argc;
+static const char **_argv;
 
-int ChessPiece::getRow()
+const char *get_option_string(const char *option_name,
+            const char *default_value)
 {
-    return row;
-} 
+    for (int i = _argc - 2; i >= 0; i -= 2)
+        if (strcmp(_argv[i], option_name) == 0)
+            return _argv[i + 1];
+    return default_value;
+}
 
-int ChessPiece::getCol()
+int get_option_int(const char *option_name, int default_value)
 {
-    return col;
+    for (int i = _argc - 2; i >= 0; i -= 2)
+        if (strcmp(_argv[i], option_name) == 0)
+            return atoi(_argv[i + 1]);
+    return default_value;
 }
 
-int ChessPiece::getType() {
-    return type;
+int flipPlayer(int curPlayer){
+    if (curPlayer == RED){
+        return BLACK;
+    }
+    return RED;
 }
 
-int ChessPiece::getPlayer() {
-    return player;
+//return the eaten piece
+int makeMove (int **board, int sr, int sc, int er, int ec){
+    int piece = board[er][ec];
+    board[er][ec] = board[sr][sc];
+    board[sr][sc] = 0;
+    return piece;
 }
 
-void ChessPiece::setPosition(int r, int c)
-{
-    row = r;
-    col = c;
+void unmakeMove (int **board, int sr, int sc, int er, int ec, int piece){
+    board[sr][sc] = board[er][ec];
+    board[er][ec] = piece;
 }
 
-bool ChessPiece::isdead() {
-    return dead;
-} 
-
-void ChessPiece::setDead() {
-    dead = true;
+//return the winner
+int gameOver(int **board) {
+    bool redAlive = false;
+    bool blackAlive = false;
+    int i, j;
+    for (i = 0; i < 3; i++){
+        for (j = 3; j<6; j++){
+            if (board[i][j] == SHUAI * BLACK){
+                blackAlive = true;
+            }
+            if (board[i][j] == SHUAI * RED) {
+                redAlive = true;
+            }
+        }
+    }
+    for (i=7; i<10; i++){
+        for (j=3; j<6; j++){
+            if (board[i][j] == SHUAI * BLACK){
+                blackAlive = true;
+            }
+            if (board[i][j] == SHUAI * RED) {
+                redAlive = true;
+            }
+        }
+    }
+    if (!blackAlive){
+        return RED;
+    }
+    if (!redAlive){
+        return BLACK;
+    }
+    return 0;
 }
 
-// int board[10][9] = { 2, 3, 6, 5, 1, 5, 6, 3, 2,
-//                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-//                      0, 4, 0, 0, 0, 0, 0, 4, 0,
-//                      7, 0, 7, 0, 7, 0, 7, 0, 7,
-//                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-//                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-//                     -7, 0,-7, 0,-7, 0,-7, 0,-7,
-//                      0,-4, 0, 0, 0, 0, 0,-4, 0,
-//                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-//                     -2,-3,-6,-5,-1,-5,-6,-3,-2};
-
-ChessPiece chess_pieces[32];
-ChessPiece board [10][9];
-int move[4];
-int curPlayer;
-bool gameOver = false;
-
-void printBoard(){
+void printBoard(int **board){
     for (int r = 0; r < 10; r++) {
         for (int j = 0; j < 9; j++) {
-            if (board[r][j].getType()*board[r][j].getPlayer() >= 0){
+            if (board[r][j] >= 0){
                 cout << " ";
             }
-            cout << board[r][j].getType()*board[r][j].getPlayer() << " ";
+            cout << board[r][j] << " ";
         }
         cout << "\n";
     }
 }
 
-void initGame() {
-    chess_pieces[0].setVal(SHUAI, 9, 4, RED);
-    chess_pieces[1].setVal(SHI, 9, 3, RED);
-    chess_pieces[2].setVal(SHI, 9, 5,RED);
-    chess_pieces[3].setVal(XIANG, 9, 2,RED);
-    chess_pieces[4].setVal(XIANG, 9, 6,RED);
-    chess_pieces[5].setVal(MA, 9, 1, RED);
-    chess_pieces[6].setVal(MA, 9, 7, RED);
-    chess_pieces[7].setVal(JU, 9, 0, RED);
-    chess_pieces[8].setVal(JU, 9, 8, RED);
-    chess_pieces[9].setVal(PAO, 7, 1, RED);
-    chess_pieces[10].setVal(PAO, 7, 7, RED);
-    chess_pieces[11].setVal(ZU, 6, 0, RED);
-    chess_pieces[12].setVal(ZU, 6, 2, RED);
-    chess_pieces[13].setVal(ZU, 6, 4, RED);
-    chess_pieces[14].setVal(ZU, 6, 6, RED);
-    chess_pieces[15].setVal(ZU, 6, 8, RED);
-
-    chess_pieces[16].setVal(SHUAI, 0, 4, BLACK);
-    chess_pieces[17].setVal(SHI, 0, 3, BLACK);
-    chess_pieces[18].setVal(SHI, 0, 5,BLACK);
-    chess_pieces[19].setVal(XIANG, 0, 2,BLACK);
-    chess_pieces[20].setVal(XIANG, 0, 6,BLACK);
-    chess_pieces[21].setVal(MA, 0, 1, BLACK);
-    chess_pieces[22].setVal(MA, 0, 7, BLACK);
-    chess_pieces[23].setVal(JU, 0, 0, BLACK);
-    chess_pieces[24].setVal(JU, 0, 8, BLACK);
-    chess_pieces[25].setVal(PAO, 2, 1, BLACK);
-    chess_pieces[26].setVal(PAO, 2, 7, BLACK);
-    chess_pieces[27].setVal(ZU, 3, 0, BLACK);
-    chess_pieces[28].setVal(ZU, 3, 2, BLACK);
-    chess_pieces[29].setVal(ZU, 3, 4, BLACK);
-    chess_pieces[30].setVal(ZU, 3, 6, BLACK);
-    chess_pieces[31].setVal(ZU, 3, 8, BLACK);
-    for (int i = 0; i < 32; i++) {
-        ChessPiece piece = chess_pieces[i];
-        board[piece.getRow()][piece.getCol()] = piece;
-    }
-    printBoard();
-}
-
-bool isValidMove(){
-    int sr = move[0];
-    int sc = move[1];
-    int er = move[2];
-    int ec = move[3];
-    ChessPiece piece = board[sr][sc];
-    if (piece.getPlayer() != curPlayer){
-        cout << "Does not have a piece there \n";
+bool isValidMove(int **board,int sr, int sc, int er, int ec){
+    if (er == sr && ec == sc) {
+        //cannot donnot move
         return false;
     }
-    if (board[er][ec].getPlayer() == curPlayer) {
-        cout << "Can not place piece on top of your piece\n";
+    if (er < 0 || er >= 10 || ec < 0 || ec >= 9){
         return false;
     }
-    switch (piece.getType()) {
-        case SHUAI: {
+    int piece = board[sr][sc];
+    int endPiece = board[er][ec];
+    if (piece * endPiece > 0){
+        // cout << "Cannot eat your own side\n";
+        return false;
+    }
+
+    switch (piece) {
+        case SHUAI * RED: {
             //Shuai
             //checkmate condition
-            if (board[er][ec].getType() == 1 && ec == sc) {
-                for (int r = 1; r < 9; r++) {
-                    if (board[r][ec].getType() != 0){
-                        cout << "Cannot checkmate with pieces in between\n";
+            if (board[er][ec] == SHUAI * BLACK){
+                if (ec != sc) {
+                    // cout << "Two Jiang must be at the same col\n";
+                    return false;
+                }
+                for (int r = er+1; r < sr; r++) {
+                    if (board[r][ec] != 0){
+                        // cout << "Cannot checkmate with pieces in between\n";
                         return false;
                     }
                 }
             } else if (ec < 3 || ec >5 || er < 7) {
-                cout << "Can not move Shuai outside the bound\n";
+                // cout << "Can not move Shuai outside the bound\n";
                 return false;
             } else if (abs(ec-sc) + abs(er-sr) != 1) {
-                cout << "Invalid Shuai Move, can only move up, down, left, right by one\n";
+                // cout << "Invalid Shuai Move, can only move up, down, left, right by one\n";
                 return false;
             }
             break;
-        }case SHI :{
-            //SHI
-            if (sr == 8 && sc == 4) {
-                //in the center position
-                if (abs(er-sr)!=1 || abs(sc-ec)!=1){    
-                    cout << "Invalid Shi move, can only move diagonally with step size 1\n";
+        }case SHUAI * BLACK: {
+            if (board[er][ec] == RED * SHUAI){
+                if (ec != sc){
                     return false;
                 }
+
+                for (int r = sr+1; r < er; r++) {
+                    if (board[r][ec] != 0){
+                        // cout << "Cannot checkmate with pieces in between\n";
+                        return false;
+                    }
+                }
+            } else if (ec < 3 || ec >5 || er > 2) {
+                // cout << "Can not move Shuai outside the bound\n";
+                return false;
+            } else if (abs(ec-sc) + abs(er-sr) != 1) {
+                // cout << "Invalid Shuai Move, can only move up, down, left, right by one\n";
+                return false;
             }
-            if ((sr == 7 || sr == 9) && (sc == 3 || sc == 5)) {
-                if (ec != 8 || ec != 4) {
-                    cout << "Invalid Shi move, can only move 8 4 at this position.\n";
-                    return false;
-                }
+            break;
+        }case SHI * RED:{
+            //SHI
+            if (er < 7 || ec > 5 || ec < 3){
+                return false;
+            }
+            if (abs(er-sr) !=1 || abs(ec-sc) != 1){
+                return false;
+            }
+            break;
+        }case SHI * BLACK: {
+            if (er > 2 || ec > 5 || ec < 3) {
+                return false;
+            }
+            if (abs(sr - er) != 1 || abs(ec-sc) != 1){
+                return false;
             }
             break;
         }case XIANG * RED: {
-            //xiang
+            //XIANG
             if (er < 5){
-                cout << "Xiang cannot pass the bound\n";
+                // cout << "Xiang cannot pass the bound\n";
                 return false;
             }
             if (abs(ec-sc) != 2 || abs(er-sr) != 2){
-                cout << "Xiang can move exactly two spaces diagonally\n";
+                // cout << "Xiang can move exactly two spaces diagonally\n";
                 return false;
             }
             int midr = sr < er ? sr + 1 : er + 1;
             int midc = sc < ec ? sc + 1 : ec + 1;
-            if (board[midr][midc].getType() != 0){
-                cout << "Xiang cannot move cross occupied points\n";
+            if (board[midr][midc] != 0){
+                // cout << "Xiang cannot move cross occupied points\n";
                 return false;
             }
             break;
+        }case XIANG * BLACK: {
+            if (er > 4) {
+                return false;
+            }
+            if (abs(ec-sc) != 2 || abs(er-sr) != 2){
+                // cout << "Xiang can move exactly two spaces diagonally\n";
+                return false;
+            }
+            int midr = sr < er ? sr + 1 : er + 1;
+            int midc = sc < ec ? sc + 1 : ec + 1;
+            if (board[midr][midc] != 0){
+                // cout << "Xiang cannot move cross occupied points\n";
+                return false;
+            }
+            break;
+        }case MA * BLACK:{
+
         }case MA * RED: {
             //MA
             if (abs(ec-sc) + abs(er-sr) != 3 || abs(ec-sc) < 1 || abs(er-sr) < 1) {
-                cout << "Ma moves one space vertically or horizontally, followed by one space outward-diagonally.\n";
+                // cout << "Ma moves one space vertically or horizontally, followed by one space outward-diagonally.\n";
                 return false;
             }
             if (abs(ec-sc) == 1){
                 //move vertically first
                 int midr = sr < er ? sr + 1 : er + 1;
-                if (board[midr][sc].getType() != 0) {
+                if (board[midr][sc] != 0) {
                     return false;
                 }
             } else {
                 int midc = sc < ec ? sc + 1 : ec + 1;
-                if (board[sr][midc].getType() != 0){
+                if (board[sr][midc] != 0){
                     return false;
                 }
             }
             break;
+        } case JU * BLACK: {
+
         } case JU * RED: {
-            //Ju
+            //JU
             if (er != sr && ec != sc) {
-                cout << "Ju can only move vertically or horizontally.\n";
+                // cout << "Ju can only move vertically or horizontally.\n";
                 return false;
             }
             if (er == sr) {
                 int minc = sc < ec ? sc : ec;
                 int maxc = sc < ec ? ec : sc;
                 for (int c = minc+1; c < maxc; c++) {
-                    if (board[sr][c].getType() != 0){
-                        cout << "Ju cannot move cross pieces.\n";
+                    if (board[sr][c] != 0){
+                        // cout << "Ju cannot move cross pieces.\n";
                         return false;
                     }
                 }
@@ -223,17 +247,19 @@ bool isValidMove(){
                 int minr = sr < er ? sr : er;
                 int maxr = sr < er ? er : sr;
                 for (int r = minr +1; r < maxr; r++) {
-                    if (board[r][sc].getType() != 0){
-                        cout << "Ju cannot move cross pieces.\n";
+                    if (board[r][sc] != 0){
+                        // cout << "Ju cannot move cross pieces.\n";
                         return false;
                     }
                 }
             }
             break;
+        } case PAO * BLACK : {
+
         } case PAO * RED: {
             //Pao
             if (er != sr && ec != sc) {
-                cout << "Pao can only move vertically or horizontally.\n";
+                // cout << "Pao can only move vertically or horizontally.\n";
                 return false;
             }
             int count = 0;
@@ -242,7 +268,7 @@ bool isValidMove(){
                 int minc = sc < ec ? sc : ec;
                 int maxc = sc < ec ? ec : sc;
                 for (int c = minc+1; c < maxc; c++) {
-                    if (board[sr][c].getType() != 0){
+                    if (board[sr][c] != 0){
                         count++;
                     }
                 }
@@ -251,70 +277,160 @@ bool isValidMove(){
                 int minr = sr < er ? sr : er;
                 int maxr = sr < er ? er : sr;
                 for (int r = minr +1; r < maxr; r++) {
-                    if (board[r][sc].getType() != 0){
+                    if (board[r][sc] != 0){
                         count++;
                     }
                 }
             }
-            if (board[er][ec].getType() == 0 && count!=0){
-                cout << "Pao cannot move cross pieces if it's not eating one.\n";
+            if (board[er][ec] == 0 && count!=0){
+                // cout << "Pao cannot move cross pieces if it's not eating one.\n";
                 return false;
-            } else if (board[er][ec].getType()!=0 && count != 1){
-                cout << "Pao cannot eat piece without crossing exactly one other piece.\n";
+            } else if (board[er][ec]!=0 && count != 1){
+                // cout << "Pao cannot eat piece without crossing exactly one other piece.\n";
+                return false;
+            }
+            break;
+        } case ZU * BLACK:{
+            if (er < sr){
+                return false;
+            }
+            if (sr < 5 && sr == er) {
+                return false;
+            }
+            if (er - sr + abs(ec-sc) > 1) {
                 return false;
             }
             break;
         } case ZU * RED: {
             //bin
-            if (sr > 4){
-                //has not pass the river yet
-                if (er != sr-1 || abs(ec-sc) != 0){
-                    cout << "Invalid bin Move, can only move up before passing the river\n";
-                    return false;
-                }
+            if (er > sr){
+                return false;
             }
-            if (abs(ec-sc) + abs(er-sr) != 1 || er > sr) {
-                cout << "Invalid bin Move, can only move up, left or right by one\n";
+            if (sr > 4 && er == sr) {
+                return false;
+            }
+            if (sr - er + abs(ec-sc) > 1){
                 return false;
             }
             break;
         }
     }
-    if (board[er][ec].getType() == SHUAI){
-        gameOver = true;
-    }
-    if (board[er][ec].getType() != 0) {
-        //is eaten
-        board[er][ec].setDead();
-    }
-    piece.setPosition(er,ec);
-    board[er][ec] = piece;
-    board[sr][sc].setVal(sr,sc,0,0);
-    printBoard();
     return true;
 }
 
-int main() {
-    // #ifdef OMP
-    //     omp_set_num_threads(OMPNUMTHREADS);
-    // #endif
-    initGame();
-    curPlayer = RED; //red, bottom half with negative values
-    while (!gameOver) {
+void initializeBoard(int **board){
+    for (int i = 0; i < 10; i++){
+        for (int j = 0; j < 9; j++){
+            board[i][j] = 0;
+        }
+    }
+    board[0][0]=2;
+    board[0][1]=3;
+    board[0][2]=6;
+    board[0][3]=5;
+    board[0][4]=1;
+    board[0][5]=5;
+    board[0][6]=6;
+    board[0][7]=3;
+    board[0][8]=2;
+
+    board[2][1]=4;
+    board[2][7]=4;
+
+    board[3][0]=7;
+    board[3][2]=7;
+    board[3][4]=7;
+    board[3][6]=7;
+    board[3][8]=7;
+
+    board[6][0]=-7;
+    board[6][2]=-7;
+    board[6][4]=-7;
+    board[6][6]=-7;
+    board[6][8]=-7;
+
+    board[7][1]=-4;
+    board[7][7]=-4;
+
+    board[9][0]=-2;
+    board[9][1]=-3;
+    board[9][2]=-6;
+    board[9][3]=-5;
+    board[9][4]=-1;
+    board[9][5]=-5;
+    board[9][6]=-6;
+    board[9][7]=-3;
+    board[9][8]=-2;
+}
+
+
+int main(int argc, const char *argv[]) {
+    double startTime, endTime, timeUsed;
+    int piece;
+    int aiType;
+    move *mB;
+    _argc = argc - 1;
+    _argv = argv + 1;
+
+    const char *algo_type = get_option_string("-m", NULL);
+    int num_of_threads = get_option_int("-n", 1);
+
+    if (algo_type[0] == 'm'){
+        aiType = MCST;
+    } else{
+        aiType = AB;
+    }
+
+    cout << omp_get_max_threads() << "\n";
+    omp_set_num_threads(num_of_threads);
+    
+    int **board = (int **)malloc(10 * sizeof(int *));
+    for (int i=0; i<10; i++) {
+        board[i] = (int *)malloc(9 * sizeof(int));
+    }
+    initializeBoard(board);
+
+    int user_move[4];
+
+    printBoard(board);
+    int curPlayer = RED; //red, bottom half with negative values
+    while (gameOver(board)==0) {
+        startTime = CycleTimer::currentSeconds();
+        if (aiType == AB){
+            mB = calculateStepAB(board, curPlayer);
+        }else{
+            mB = calculateStepMC(board, curPlayer);
+        }
+        endTime = CycleTimer::currentSeconds();
+
+        timeUsed = (endTime - startTime)*1000.f;
+        cout << "AI (R) decided to move from " << mB->sr << "," << mB->sc;
+        cout << " to "<<mB->er << "," << mB->ec <<" with time = " << timeUsed << "ms\n";
+        makeMove(board, mB->sr, mB->sc, mB->er, mB->ec);
+        free(mB);
+        printBoard(board);
+        if (gameOver(board) == RED){
+            cout << "Red Wins!\n";
+            return 1;
+        }
+        curPlayer = BLACK;
         while (true) {
             cout << "enter your move of 4 numbers, space separated: ";
             // user inputs values space separated in one line.  Inputs more than the count are discarded.
-            cin >> move[0] >> move[1] >> move[2] >> move[3];
-            if (isValidMove()) {
+            cin >> user_move[0] >> user_move[1] >> user_move[2] >> user_move[3];
+            
+            piece = board[user_move[0]][user_move[1]];
+            if (piece * curPlayer <= 0){
+                cout << "Does not have a piece there \n";
+            }else if (isValidMove(board, user_move[0], user_move[1],user_move[2],user_move[3])) {
+                makeMove(board, user_move[0], user_move[1],user_move[2],user_move[3]);
                 break;
             }
         }
-        // startTime = CycleTimer::currentSeconds();
-        // calculateStep();
-        // min = (endTime - startTime) * 1000.f;
-        // cout << "AI (B) decided to move with time = " << min << "ms\n";
+        printBoard(board);
+        curPlayer = RED;
     }
-    
+    cout << "BLACK Wins!\n";
     
     return 1;
 }
