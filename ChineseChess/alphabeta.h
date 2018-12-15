@@ -7,15 +7,15 @@
 
 typedef struct abResult_t {
   int bestRes;
-  move *mv;
+  Move *mv;
 } abResult;
 
 typedef struct movesWithPlayer_t {
-    move *mv;
+    Move *mv;
     int player;
     int startPiece;
 } movesWithPlayer;
 
-move *calculateStepAB(int **board, int curPlayer);
+Move *calculateStepAB(int **board, int curPlayer);
 
 #endif

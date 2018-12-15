@@ -25,6 +25,20 @@ typedef struct move_t {
   int ec;
 } move;
 
+class Move{
+	public:
+		int sr;
+		int sc;
+		int er;
+		int ec;
+		Move(int sR, int sC, int eR, int eC) {
+			sr = sR;
+			sc = sC;
+			er = eR;
+			ec = eC;
+		}
+};
+
 bool isValidMove(int **board,int sr, int sc, int er, int ec);
 int makeMove (int **board, int sr, int sc, int er, int ec);
 void unmakeMove (int **board, int sr, int sc, int er, int ec, int piece);

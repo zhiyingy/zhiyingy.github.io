@@ -10,7 +10,7 @@ default: $(APP_NAME)
 
 # Compile for CPU
 cpu: CXX = g++ -m64 -std=c++11
-cpu: CXXFLAGS = -I. -O3 -Wall -fopenmp -Wno-unknown-pragmas
+cpu: CXXFLAGS = -I. -O3 -fopenmp -Wno-unknown-pragmas
 
 # Compilation Rules
 $(APP_NAME): $(OBJS)

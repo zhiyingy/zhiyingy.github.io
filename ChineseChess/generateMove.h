@@ -3,6 +3,6 @@
 #include <vector>
 #include "cChess.h"
 
-std::vector<move*> generateAllMoves(int **board, int curPlayer);
+std::vector<Move*> generateAllMoves(int **board, int curPlayer);
 
 #endif
