@@ -4,16 +4,16 @@
 #include "generateMove.h"
 #include <math.h>
 #include <iostream>
+#include <stack> 
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
 
-void deepCopyBoard (int **board, int **result) {
-    int i, j;
-    for (i=0; i < 10; i++) {
-        for (j=0; j<9; j++){
-            result[i][j] = board[i][j];
+void makeCopyBoard(int **board, int** result){
+    for (int i = 0; i<10; i++){
+        for (int j = 0; j<9; j++){
+            result[i][j]=board[i][j];
         }
     }
 }
@@ -52,24 +52,6 @@ MovesMC *ucbBestChild(MovesMC *node, double c) {
     return chosenChild;
 }
 
-MovesMC *select(int **board, MovesMC *root) {
-    MovesMC *node = root;
-    while (gameOver(board) == 0){
-        //expandable
-        if (node->possibleMoves.size()>node->nextIndex){
-            MovesMC *child = newMcNode(node, node->possibleMoves[node->nextIndex],board,node->player);
-            (node->children).push_back(child);
-            node->nextIndex++;
-            return child;
-        }
-        node->possibleMoves.clear();
-        //select best ucb child
-        node = ucbBestChild(node,C);
-        makeMove(board, node->mv->sr, node->mv->sc, node->mv->er, node->mv->ec);
-    }
-    return node;
-}
-
 void back(MovesMC *node, int win_inc, int sim_inc){
     bool win = false;
     node -> n += sim_inc;
@@ -88,6 +70,8 @@ int simulate(int **board, MovesMC *leaf, int curPlayer) {
     std::vector<Move*> possibleMoves;
     int index, step;
     Move *curMove;
+    makeMove(board, leaf->mv->sr, leaf->mv->sc, leaf->mv->er, leaf->mv->ec);
+    leaf->n++;
     int nextPlayer = flipPlayer(leaf->player);
     for (step = 0; step < MAXSTEP; step++){
         if (gameOver(board)!=0){
@@ -106,61 +90,68 @@ int simulate(int **board, MovesMC *leaf, int curPlayer) {
     return 0;
 }
 
-Move *mcts(int **board, int curPlayer, int simulations){
+void makeMoves(int **board, MovesMC *leaf){
+    if (leaf->mv == NULL){
+        return;
+    }
+    makeMoves(board, leaf->parent);
+    makeMove(board, leaf->mv->sr, leaf->mv->sc, leaf->mv->er, leaf->mv->ec);
+}
+
+MovesMC *select(int **board, MovesMC *root) {
+    MovesMC *node = root;
+    while (gameOver(board) == 0){
+        //expandable
+        if ((int)node->possibleMoves.size()>node->nextIndex){
+            return node;
+        }
+        node->possibleMoves.clear();
+        //select best ucb child
+        node = ucbBestChild(node,C);
+        makeMove(board, node->mv->sr, node->mv->sc, node->mv->er, node->mv->ec);
+    }
+    return node;
+}
+
+Move *mcts(int **board, int curPlayer, int sim){
     int **copyBoard;
     int result, i;
     time_t t;
-    std::stack<MovesMC*> S;
     srand((unsigned) time(&t));
     MovesMC *root = newMcNode(NULL, NULL, board, curPlayer);
-    S.push(root);
 
     copyBoard = (int **)malloc(10 * sizeof(int *));
     for (i = 0; i < 10; i++){
         copyBoard[i] = (int*)malloc(9 * sizeof(int));
     }
 
-    while (!S.empty()) {
-        MovesMC* leaf = S.top();
-        S.pop();
-        if (leaf->nextIndex == node->possibleMoves.size()){
-            //select best ucbchild
-            S.push(ucbBestChild(leaf, C));
-        } else {
-            deepCopyBoard(board, copyBoard);
-            //do expansion here
-            for (std::vector<Moves*>::iterator it = (leaf->possibleMoves).begin(); it != (leaf->possibleMoves).end(); it++){
-                MovesMC *child = newMcNode(leaf, *it, board, leaf->player);
-                leaf->children.push_back(child);
-                leaf->nextIndex+=1;
-            }
-            int wins;
-            //do parallel simulation
-            #pragma omp parallel for default(shared) shared() private(i) schedule(dynamic)
-            for (i = 0; i < leaf->children.size(); i++) {
-                MovesMC *child = leaf->children[i];
-                int win = simulate(copyBoard, child, curPlayer);
-                #pragma omp critical
-                wins += win;
-            }
-            back(leaf, wins, leaf->children.size());
-        }
-    }
-
-    for (i = 0; i < simulations; i++) {
-        deepCopyBoard(board,copyBoard);
+    for (i=0 ; i<sim; i++){
+        makeCopyBoard(board, copyBoard);
         MovesMC *leaf = select(copyBoard, root);
-        win_inc = simulate(copyBoard, leaf, curPlayer);
-        back(leaf, win_inc);
+        //do expansion here
+        for (std::vector<Move*>::iterator it = (leaf->possibleMoves).begin(); it != (leaf->possibleMoves).end(); it++){
+            MovesMC *child = newMcNode(leaf, *it, copyBoard, leaf->player);
+            leaf->children.push_back(child);
+            leaf->nextIndex=leaf->possibleMoves.size();
+        }
+        int wins;
+        //do parallel simulation
+        #pragma omp parallel for default(shared) private(i) schedule(dynamic)
+        for (i = 0; i < (int)leaf->children.size(); i++) {
+            int **localCopy = makeCopy(board);
+            MovesMC *child = leaf->children[i];
+            int win = simulate(localCopy, child, curPlayer);
+            freeBoard(localCopy);
+            #pragma omp critical
+            wins += win;
+        }
+        back(leaf, wins, leaf->children.size());
     }
-
-    for (i = 0; i < 10; i++){
-        free(copyBoard[i]);
-    }
-    free(copyBoard);
+    
     return ucbBestChild(root,0.0)->mv;
 }
 
 Move *calculateStepMC(int **board, int curPlayer){
-    return mcts(board, curPlayer, 400);
+    Move *mv= mcts(board, curPlayer, 10000);
+    return mv;
 }

@@ -2,7 +2,7 @@ APP_NAME=cChess
 
 OBJS += cChess.o
 OBJS += evaluate.o
-OBJS += montecarlo.o
+OBJS += parallelMcts.o
 OBJS += generateMove.o
 OBJS += parallelab.o
 
