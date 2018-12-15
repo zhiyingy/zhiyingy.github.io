@@ -13,7 +13,7 @@
 #include "evaluate.h"
 #include "alphabeta.h"
 
-int **deepCopyBoard (int **board) {
+int **makeCopy (int **board) {
     int i, j;
     int **result = (int **)malloc(10 * sizeof(int *));
     for (i=0; i < 10; i++) {
@@ -25,7 +25,7 @@ int **deepCopyBoard (int **board) {
     return result;
 }
 
-void deepFreeBoard (int **board) {
+void freeBoard (int **board) {
     int i;
     for (i=0; i < 10; i++) {
         free(board[i]);
@@ -33,140 +33,113 @@ void deepFreeBoard (int **board) {
     free(board);
 }
 
-minimaxResult *seqABP(int curDepth, int maxDepth, int alpha, int beta,
+abResult *seqABP(int curDepth, int alpha, int beta,
     int **board, int curPlayer) {
-    if (curDepth == maxDepth|| gameOver(board) != 0) {
-        int curScore = evaluate(board, curPlayer);
-        minimaxResult *res = (minimaxResult *)malloc(sizeof(minimaxResult));
-        res->bestRes = curScore;
-        res->mv = NULL;
+    move *bestMove;
+    int score, endPiece;
+    abResult *res = (abResult *)malloc(sizeof(abResult));
+
+
+    if (curDepth == MAX_DEPTH|| gameOver(board) != 0) {
+        res->bestRes = evaluate(board, curPlayer);
         return res;
     }
 
     std::vector<move *> possibleMoves = generateAllMoves(board, curPlayer);
-  
-    if (curDepth == 0) {
-        std::random_shuffle(possibleMoves.begin(), possibleMoves.end());
-    }
-
-    move *bestMove = NULL;
 
     for (std::vector<move*>::iterator it = possibleMoves.begin(); it != possibleMoves.end(); it++) {
         move *curMove = *it;
-        int startPiece = board[curMove->sr][curMove->sc];
-        int endPiece = endPiece = board[curMove->er][curMove->ec];
-
-        makeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec);
-
-        minimaxResult *curRes = seqABP(curDepth + 1, maxDepth, -beta, -alpha, board,
-            flipPlayer(curPlayer));
-        int resS = -(curRes->bestRes);
-
+        endPiece = makeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec);
+        abResult *curRes = seqABP(curDepth + 1, -beta, -alpha, board, flipPlayer(curPlayer));
         unmakeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec, endPiece);
-
-        if (beta <= resS) {
-            free(curRes);
-            minimaxResult *res = (minimaxResult *)malloc(sizeof(minimaxResult));
-            res->bestRes = beta;  // returning alpha bc thats the max value (maxing in maxi and - in upper level is equiv to min'ing in mini)
+        score = -curRes->bestRes;
+        if (score >= beta) {
+            res->bestRes = beta;
             res->mv = bestMove;
+            free(curRes);
             return res;
-            }
-
-        if (alpha < resS) {
-            bestMove = curMove;
-            alpha = resS;
         }
-        free(curRes->mv);
+
+        if (score > alpha) {
+            bestMove = curMove;
+            alpha = score;
+        }
         free(curRes);
     }
 
-    minimaxResult *res = (minimaxResult *)malloc(sizeof(minimaxResult));
     res->bestRes = alpha;
     res->mv = bestMove;
     return res;
 }
 
 
-minimaxResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
+abResult *firstMoveSearch(int curDepth, int alpha, int beta,
     int **board, int curPlayer) {
+    move *bestMove;
+    volatile bool flag = false;
+    abResult *res = (abResult *)malloc(sizeof(abResult));
 
-    if (curDepth == maxDepth|| gameOver(board) != 0) {
-        int curScore = evaluate(board, curPlayer);
-        minimaxResult *res = (minimaxResult *)malloc(sizeof(minimaxResult));
-        res->bestRes = curScore;
-        res->mv = NULL;
+    if (curDepth == MAX_DEPTH || gameOver(board) != 0) {
+        res->bestRes = evaluate(board, curPlayer);
         return res;
     }
 
     std::vector<move *> possibleMoves = generateAllMoves(board, curPlayer);
-    // std::cout << "possibleMoves " << possibleMoves.size() << "\n";
-    if (curDepth == 0) {
-        std::random_shuffle(possibleMoves.begin(), possibleMoves.end());
-    }
 
-    move *bestMove = NULL;
+    // if (curDepth == 0) {
+    //     std::random_shuffle(possibleMoves.begin(), possibleMoves.end());
+    // }
 
     move *firstMove = possibleMoves.at(0);
-    int startPiece = board[firstMove->sr][firstMove->sc];
-    int endPiece = board[firstMove->er][firstMove->ec];
-    makeMove(board, firstMove->sr, firstMove->sc, firstMove->er, firstMove->ec);
-    minimaxResult *firstRes = firstMoveSearch(curDepth + 1, maxDepth, -beta, -alpha, board, flipPlayer(curPlayer));
-    firstRes->bestRes = -(firstRes->bestRes);
-    int resS = firstRes->bestRes;
+    int endPiece = makeMove(board, firstMove->sr, firstMove->sc, firstMove->er, firstMove->ec);
+    abResult *firstRes = firstMoveSearch(curDepth + 1, -beta, -alpha, board, flipPlayer(curPlayer));
     unmakeMove(board, firstMove->sr, firstMove->sc, firstMove->er, firstMove->ec, endPiece);
     
-    if (resS > beta) {
+    int score = -firstRes->bestRes;
+    if (score >= beta) {
         free(firstRes);
-        minimaxResult *res = (minimaxResult *)malloc(sizeof(minimaxResult));
+        abResult *res = (abResult *)malloc(sizeof(abResult));
         res->bestRes = beta;
         res->mv = bestMove;
         return res;
     }
-    if (alpha < resS) {
+    if (alpha < score) {
         bestMove = firstMove;
-        alpha = resS;
+        alpha = score;
     }
 
-    if (int(possibleMoves.size()) > 1)  {
-        volatile bool flag = false;
+    if (possibleMoves.size() > 1)  {
         int i;
         #pragma omp parallel for default(shared) shared(flag, alpha, bestMove) private(i) schedule(dynamic)
         for (i = 1; i < possibleMoves.size(); i++) {
-
             if (flag) {
                 continue;
             }
             else {
+                int **boardCopy = makeCopy(board);
                 move *curMove = possibleMoves.at(i);
-                int startPiece = board[curMove->sr][curMove->sc];
-                int endPiece = board[curMove->er][curMove->ec];
-
-                int **boardCopy = deepCopyBoard(board);
-                // we know curMove is valid
                 makeMove(boardCopy, curMove->sr, curMove->sc, curMove->er, curMove->ec);
-                minimaxResult *curRes = seqABP(curDepth + 1, maxDepth, -beta, -alpha, boardCopy, flipPlayer(curPlayer));
-                curRes->bestRes = -curRes->bestRes;
-                int sres = curRes->bestRes;
-                deepFreeBoard(boardCopy);
+                abResult *curRes = seqABP(curDepth + 1, -beta, -alpha, boardCopy, flipPlayer(curPlayer));
+                freeBoard(boardCopy);
 
-                if (sres >= beta) {
-                    free(curRes);
-                    minimaxResult *res = (minimaxResult*)malloc(sizeof(minimaxResult));
+                int resScore = -curRes->bestRes;
+                if (resScore >= beta) {
                     res->bestRes = beta;
                     res->mv = bestMove;
                     flag = true;
                 }
             #pragma omp critical
-                if (alpha < sres) {
+                if (alpha < resScore) {
                     bestMove = curMove;
-                    alpha = curRes->bestRes;
+                    alpha = resScore;
                 }
-                free(curRes->mv);
                 free(curRes);
             }
         }
     }
-    minimaxResult *res = (minimaxResult *)malloc(sizeof(minimaxResult));
+    if (flag){
+        return res;
+    }
     res->bestRes = alpha;
     res->mv = bestMove;
     return res;
@@ -174,11 +147,9 @@ minimaxResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
 
 move *calculateStepAB(int **board, int curPlayer) {
     std::srand ( unsigned ( std::time(0) ) );
-    // AI is called to help les goooooo!!!
-    minimaxResult *res;
-    res = firstMoveSearch(0, MAX_DEPTH, NEGINF, POSINF, board, curPlayer);
+    abResult *res;
+    res = firstMoveSearch(0, NEGINF, POSINF, board, curPlayer);
     move *m = res->mv;
     free(res);
     return m;
-  // return NULL;
 }

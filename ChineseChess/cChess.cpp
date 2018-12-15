@@ -40,10 +40,11 @@ int flipPlayer(int curPlayer){
 }
 
 //return the eaten piece
-void makeMove (int **board, int sr, int sc, int er, int ec){
+int makeMove (int **board, int sr, int sc, int er, int ec){
     int piece = board[er][ec];
     board[er][ec] = board[sr][sc];
     board[sr][sc] = 0;
+    return piece;
 }
 
 void unmakeMove (int **board, int sr, int sc, int er, int ec, int piece){
@@ -318,17 +319,6 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
 }
 
 void initializeBoard(int **board){
-    // int **board = { 2, 3, 6, 5, 1, 5, 6, 3, 2,
-    //                 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    //                 0, 4, 0, 0, 0, 0, 0, 4, 0,
-    //                 7, 0, 7, 0, 7, 0, 7, 0, 7,
-    //                 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    //                 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    //                -7, 0,-7, 0,-7, 0,-7, 0,-7,
-    //                 0,-4, 0, 0, 0, 0, 0,-4, 0,
-    //                 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    //                -2,-3,-6,-5,-1,-5,-6,-3,-2};
-
     for (int i = 0; i < 10; i++){
         for (int j = 0; j < 9; j++){
             board[i][j] = 0;
@@ -391,8 +381,9 @@ int main(int argc, const char *argv[]) {
         aiType = AB;
     }
 
+    cout << omp_get_max_threads() << "\n";
     omp_set_num_threads(num_of_threads);
-
+    
     int **board = (int **)malloc(10 * sizeof(int *));
     for (int i=0; i<10; i++) {
         board[i] = (int *)malloc(9 * sizeof(int));

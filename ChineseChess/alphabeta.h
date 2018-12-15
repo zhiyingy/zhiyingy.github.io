@@ -5,16 +5,15 @@
 
 #define MAX_DEPTH 6
 
-typedef struct minimaxResult_t {
+typedef struct abResult_t {
   int bestRes;
   move *mv;
-} minimaxResult;
+} abResult;
 
 typedef struct movesWithPlayer_t {
     move *mv;
     int player;
     int startPiece;
-    int endPiece;
 } movesWithPlayer;
 
 move *calculateStepAB(int **board, int curPlayer);
