@@ -4,10 +4,9 @@
 #include <omp.h>
 #include <cstring>
 #include <iostream>
-#include "lib/CycleTimer.h"
+#include <chrono>
 #include "alphabeta.h"
 #include "montecarlo.h"
-using namespace std;
 
 #include "cChess.h"
 #include "alphabeta.h"
@@ -90,11 +89,11 @@ void printBoard(int **board){
     for (int r = 0; r < 10; r++) {
         for (int j = 0; j < 9; j++) {
             if (board[r][j] >= 0){
-                cout << " ";
+                std::cout << " ";
             }
-            cout << board[r][j] << " ";
+            std::cout << board[r][j] << " ";
         }
-        cout << "\n";
+        std::cout << "\n";
     }
 }
 
@@ -109,7 +108,7 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
     int piece = board[sr][sc];
     int endPiece = board[er][ec];
     if (piece * endPiece > 0){
-        // cout << "Cannot eat your own side\n";
+        // std::cout << "Cannot eat your own side\n";
         return false;
     }
 
@@ -119,20 +118,20 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
             //checkmate condition
             if (board[er][ec] == SHUAI * BLACK){
                 if (ec != sc) {
-                    // cout << "Two Jiang must be at the same col\n";
+                    // std::cout << "Two Jiang must be at the same col\n";
                     return false;
                 }
                 for (int r = er+1; r < sr; r++) {
                     if (board[r][ec] != 0){
-                        // cout << "Cannot checkmate with pieces in between\n";
+                        // std::cout << "Cannot checkmate with pieces in between\n";
                         return false;
                     }
                 }
             } else if (ec < 3 || ec >5 || er < 7) {
-                // cout << "Can not move Shuai outside the bound\n";
+                // std::cout << "Can not move Shuai outside the bound\n";
                 return false;
             } else if (abs(ec-sc) + abs(er-sr) != 1) {
-                // cout << "Invalid Shuai Move, can only move up, down, left, right by one\n";
+                // std::cout << "Invalid Shuai Move, can only move up, down, left, right by one\n";
                 return false;
             }
             break;
@@ -144,15 +143,15 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
 
                 for (int r = sr+1; r < er; r++) {
                     if (board[r][ec] != 0){
-                        // cout << "Cannot checkmate with pieces in between\n";
+                        // std::cout << "Cannot checkmate with pieces in between\n";
                         return false;
                     }
                 }
             } else if (ec < 3 || ec >5 || er > 2) {
-                // cout << "Can not move Shuai outside the bound\n";
+                // std::cout << "Can not move Shuai outside the bound\n";
                 return false;
             } else if (abs(ec-sc) + abs(er-sr) != 1) {
-                // cout << "Invalid Shuai Move, can only move up, down, left, right by one\n";
+                // std::cout << "Invalid Shuai Move, can only move up, down, left, right by one\n";
                 return false;
             }
             break;
@@ -176,17 +175,17 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
         }case XIANG * RED: {
             //XIANG
             if (er < 5){
-                // cout << "Xiang cannot pass the bound\n";
+                // std::cout << "Xiang cannot pass the bound\n";
                 return false;
             }
             if (abs(ec-sc) != 2 || abs(er-sr) != 2){
-                // cout << "Xiang can move exactly two spaces diagonally\n";
+                // std::cout << "Xiang can move exactly two spaces diagonally\n";
                 return false;
             }
             int midr = sr < er ? sr + 1 : er + 1;
             int midc = sc < ec ? sc + 1 : ec + 1;
             if (board[midr][midc] != 0){
-                // cout << "Xiang cannot move cross occupied points\n";
+                // std::cout << "Xiang cannot move cross occupied points\n";
                 return false;
             }
             break;
@@ -195,13 +194,13 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
                 return false;
             }
             if (abs(ec-sc) != 2 || abs(er-sr) != 2){
-                // cout << "Xiang can move exactly two spaces diagonally\n";
+                // std::cout << "Xiang can move exactly two spaces diagonally\n";
                 return false;
             }
             int midr = sr < er ? sr + 1 : er + 1;
             int midc = sc < ec ? sc + 1 : ec + 1;
             if (board[midr][midc] != 0){
-                // cout << "Xiang cannot move cross occupied points\n";
+                // std::cout << "Xiang cannot move cross occupied points\n";
                 return false;
             }
             break;
@@ -210,7 +209,7 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
         }case MA * RED: {
             //MA
             if (abs(ec-sc) + abs(er-sr) != 3 || abs(ec-sc) < 1 || abs(er-sr) < 1) {
-                // cout << "Ma moves one space vertically or horizontally, followed by one space outward-diagonally.\n";
+                // std::cout << "Ma moves one space vertically or horizontally, followed by one space outward-diagonally.\n";
                 return false;
             }
             if (abs(ec-sc) == 1){
@@ -231,7 +230,7 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
         } case JU * RED: {
             //JU
             if (er != sr && ec != sc) {
-                // cout << "Ju can only move vertically or horizontally.\n";
+                // std::cout << "Ju can only move vertically or horizontally.\n";
                 return false;
             }
             if (er == sr) {
@@ -239,7 +238,7 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
                 int maxc = sc < ec ? ec : sc;
                 for (int c = minc+1; c < maxc; c++) {
                     if (board[sr][c] != 0){
-                        // cout << "Ju cannot move cross pieces.\n";
+                        // std::cout << "Ju cannot move cross pieces.\n";
                         return false;
                     }
                 }
@@ -248,7 +247,7 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
                 int maxr = sr < er ? er : sr;
                 for (int r = minr +1; r < maxr; r++) {
                     if (board[r][sc] != 0){
-                        // cout << "Ju cannot move cross pieces.\n";
+                        // std::cout << "Ju cannot move cross pieces.\n";
                         return false;
                     }
                 }
@@ -259,7 +258,7 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
         } case PAO * RED: {
             //Pao
             if (er != sr && ec != sc) {
-                // cout << "Pao can only move vertically or horizontally.\n";
+                // std::cout << "Pao can only move vertically or horizontally.\n";
                 return false;
             }
             int count = 0;
@@ -283,10 +282,10 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
                 }
             }
             if (board[er][ec] == 0 && count!=0){
-                // cout << "Pao cannot move cross pieces if it's not eating one.\n";
+                // std::cout << "Pao cannot move cross pieces if it's not eating one.\n";
                 return false;
             } else if (board[er][ec]!=0 && count != 1){
-                // cout << "Pao cannot eat piece without crossing exactly one other piece.\n";
+                // std::cout << "Pao cannot eat piece without crossing exactly one other piece.\n";
                 return false;
             }
             break;
@@ -365,7 +364,10 @@ void initializeBoard(int **board){
 
 
 int main(int argc, const char *argv[]) {
-    double startTime, endTime, timeUsed;
+    using namespace std::chrono;
+    typedef std::chrono::high_resolution_clock Clock;
+    typedef std::chrono::duration<double> dsec;
+    double timeUsed;
     int piece;
     int aiType;
     Move *mB;
@@ -381,7 +383,7 @@ int main(int argc, const char *argv[]) {
         aiType = AB;
     }
 
-    cout << omp_get_max_threads() << "\n";
+    std::cout << omp_get_max_threads() << "\n";
     omp_set_num_threads(num_of_threads);
     
     int **board = (int **)malloc(10 * sizeof(int *));
@@ -395,33 +397,31 @@ int main(int argc, const char *argv[]) {
     printBoard(board);
     int curPlayer = RED; //red, bottom half with negative values
     while (gameOver(board)==0) {
-        startTime = CycleTimer::currentSeconds();
+        auto startTime = Clock::now();
         if (aiType == AB){
             mB = calculateStepAB(board, curPlayer);
         }else{
             mB = calculateStepMC(board, curPlayer);
         }
-        endTime = CycleTimer::currentSeconds();
-
-        timeUsed = (endTime - startTime)*1000.f;
-        cout << "AI (R) decided to move from " << mB->sr << "," << mB->sc;
-        cout << " to "<<mB->er << "," << mB->ec <<" with time = " << timeUsed << "ms\n";
+        timeUsed = duration_cast<dsec>(Clock::now() - startTime).count();
+        std::cout << "AI (R) decided to move from " << mB->sr << "," << mB->sc;
+        std::cout << " to "<<mB->er << "," << mB->ec <<" with time = " << timeUsed << "s\n";
         makeMove(board, mB->sr, mB->sc, mB->er, mB->ec);
         free(mB);
         printBoard(board);
         if (gameOver(board) == RED){
-            cout << "Red Wins!\n";
+            std::cout << "Red Wins!\n";
             return 1;
         }
         curPlayer = BLACK;
         while (true) {
-            cout << "enter your move of 4 numbers, space separated: ";
+            std::cout << "enter your move of 4 numbers, space separated: ";
             // user inputs values space separated in one line.  Inputs more than the count are discarded.
-            cin >> user_move[0] >> user_move[1] >> user_move[2] >> user_move[3];
+            std::cin >> user_move[0] >> user_move[1] >> user_move[2] >> user_move[3];
             
             piece = board[user_move[0]][user_move[1]];
             if (piece * curPlayer <= 0){
-                cout << "Does not have a piece there \n";
+                std::cout << "Does not have a piece there \n";
             }else if (isValidMove(board, user_move[0], user_move[1],user_move[2],user_move[3])) {
                 makeMove(board, user_move[0], user_move[1],user_move[2],user_move[3]);
                 break;
@@ -430,7 +430,7 @@ int main(int argc, const char *argv[]) {
         printBoard(board);
         curPlayer = RED;
     }
-    cout << "BLACK Wins!\n";
+    std::cout << "BLACK Wins!\n";
     
     return 1;
 }

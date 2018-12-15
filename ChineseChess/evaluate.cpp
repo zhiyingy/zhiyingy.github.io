@@ -13,10 +13,10 @@ int evaluate(int **board, int curPlayer){
                 piece = board[i][j];
                 switch(piece){
                     case SHUAI * RED:{
-                        redTo += B_SHUAI;
+                        redTo = redTo + B_SHUAI;
                         break;
                     }case SHUAI * BLACK:{
-                        blackTo += B_SHUAI;
+                        blackTo = blackTo + B_SHUAI;
                         break;
                     }case SHI * RED:{
                         redTo = redTo + B_SHI;

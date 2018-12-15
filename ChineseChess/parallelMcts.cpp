@@ -19,19 +19,25 @@ void deepCopyBoard (int **board, int **result) {
 }
 
 MovesMC *newMcNode(MovesMC *parent, Move *mv, int **board, int curPlayer) {
+    int endPiece;
     if (mv != NULL){
-        makeMove(board, mv->sr, mv->sc, mv->er, mv->ec);
+        endPiece = makeMove(board, mv->sr, mv->sc, mv->er, mv->ec);
     }
     MovesMC *node = new MovesMC(parent,mv,flipPlayer(curPlayer),generateAllMoves(board,curPlayer));
+    if (mv != NULL){
+        unmakeMove(board, mv->sr, mv->sc, mv->er, mv->ec, endPiece);
+    }
     return node;
 }
 
 MovesMC *ucbBestChild(MovesMC *node, double c) {
     double curVal;
+    int v;
     MovesMC *chosenChild = NULL;
     double maxValue = -1.0;
     int n = node->n;
     int index = 0;
+    int chosenIndex = 0;
     for (std::vector<MovesMC*>::iterator it = (node->children).begin(); 
         it != (node->children).end(); it++) {
         MovesMC *child = *it;
@@ -39,6 +45,7 @@ MovesMC *ucbBestChild(MovesMC *node, double c) {
         if (curVal > maxValue){
             maxValue = curVal;
             chosenChild = child;
+            chosenIndex = index;
         }
         index++;
     }
@@ -49,7 +56,7 @@ MovesMC *select(int **board, MovesMC *root) {
     MovesMC *node = root;
     while (gameOver(board) == 0){
         //expandable
-        if ((int)node->possibleMoves.size()>node->nextIndex){
+        if (node->possibleMoves.size()>node->nextIndex){
             MovesMC *child = newMcNode(node, node->possibleMoves[node->nextIndex],board,node->player);
             (node->children).push_back(child);
             node->nextIndex++;
@@ -63,13 +70,13 @@ MovesMC *select(int **board, MovesMC *root) {
     return node;
 }
 
-void back(MovesMC *node, int win_inc){
+void back(MovesMC *node, int win_inc, int sim_inc){
     bool win = false;
-    node -> n++;
+    node -> n += sim_inc;
     node -> wins += win_inc;
     while (node->parent != NULL) {
         node = node->parent;
-        node -> n++;
+        node -> n += sim_inc;
         if (win){
             node->wins += win_inc;
         }
@@ -101,22 +108,53 @@ int simulate(int **board, MovesMC *leaf, int curPlayer) {
 
 Move *mcts(int **board, int curPlayer, int simulations){
     int **copyBoard;
+    int result, i;
     time_t t;
+    std::stack<MovesMC*> S;
     srand((unsigned) time(&t));
     MovesMC *root = newMcNode(NULL, NULL, board, curPlayer);
+    S.push(root);
+
     copyBoard = (int **)malloc(10 * sizeof(int *));
-    for (int i = 0; i < 10; i++){
-        copyBoard[i] = (int *)malloc(9 * sizeof(int));
+    for (i = 0; i < 10; i++){
+        copyBoard[i] = (int*)malloc(9 * sizeof(int));
     }
 
-    for (int i = 0; i < simulations; i++) {
+    while (!S.empty()) {
+        MovesMC* leaf = S.top();
+        S.pop();
+        if (leaf->nextIndex == node->possibleMoves.size()){
+            //select best ucbchild
+            S.push(ucbBestChild(leaf, C));
+        } else {
+            deepCopyBoard(board, copyBoard);
+            //do expansion here
+            for (std::vector<Moves*>::iterator it = (leaf->possibleMoves).begin(); it != (leaf->possibleMoves).end(); it++){
+                MovesMC *child = newMcNode(leaf, *it, board, leaf->player);
+                leaf->children.push_back(child);
+                leaf->nextIndex+=1;
+            }
+            int wins;
+            //do parallel simulation
+            #pragma omp parallel for default(shared) shared() private(i) schedule(dynamic)
+            for (i = 0; i < leaf->children.size(); i++) {
+                MovesMC *child = leaf->children[i];
+                int win = simulate(copyBoard, child, curPlayer);
+                #pragma omp critical
+                wins += win;
+            }
+            back(leaf, wins, leaf->children.size());
+        }
+    }
+
+    for (i = 0; i < simulations; i++) {
         deepCopyBoard(board,copyBoard);
         MovesMC *leaf = select(copyBoard, root);
-        int win_inc = simulate(copyBoard, leaf, curPlayer);
+        win_inc = simulate(copyBoard, leaf, curPlayer);
         back(leaf, win_inc);
     }
 
-    for (int i = 0; i < 10; i++){
+    for (i = 0; i < 10; i++){
         free(copyBoard[i]);
     }
     free(copyBoard);
