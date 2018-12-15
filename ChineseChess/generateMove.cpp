@@ -5,21 +5,13 @@
 #include <iostream>
 #include "generateMove.h"
 
-void addMove(int r, int c, int x, int y, std::vector<move*>* possibleMoves){
-    move *curMove = (move *)malloc(sizeof(move));
-    if (r < 0 || c < 0 || x < 0 || y < 0 || x > 9 || y > 8){
-        std::cout << "why\n";
-        return;
-    }
-    curMove->sr = r;
-    curMove->sc = c;
-    curMove->er = x;
-    curMove->ec = y;
+void addMove(int r, int c, int x, int y, std::vector<Move*>* possibleMoves){
+    Move *curMove = new Move(r,c,x,y);
     (*possibleMoves).push_back(curMove);
 }
 
 void gen_shuaimove (int **board, int r, int c, int curPlayer, 
-    std::vector<move*>* possibleMoves) {
+    std::vector<Move*>* possibleMoves) {
     int x, y;
     if (curPlayer == BLACK) {
         for (x = 0; x < 3; x++){
@@ -41,7 +33,7 @@ void gen_shuaimove (int **board, int r, int c, int curPlayer,
 }
 
 void gen_shimove (int **board, int r, int c, int curPlayer, 
-    std::vector<move*>* possibleMoves){
+    std::vector<Move*>* possibleMoves){
     int x, y;
     if (curPlayer == RED){
         for (x = 7; x < 10; x++){
@@ -64,7 +56,7 @@ void gen_shimove (int **board, int r, int c, int curPlayer,
 }
 
 void gen_xiangmove (int **board, int r, int c, int curPlayer, 
-    std::vector<move*>* possibleMoves){
+    std::vector<Move*>* possibleMoves){
     int x,y;
     x = r + 2;
     y = c + 2;
@@ -92,7 +84,7 @@ void gen_xiangmove (int **board, int r, int c, int curPlayer,
 }
 
 void gen_mamove (int **board, int r, int c, int curPlayer, 
-    std::vector<move*>* possibleMoves){
+    std::vector<Move*>* possibleMoves){
     int x, y;
     x = r + 2;
     y = c + 1;
@@ -144,7 +136,7 @@ void gen_mamove (int **board, int r, int c, int curPlayer,
 }
 
 void gen_jumove (int **board, int r, int c, int curPlayer, 
-    std::vector<move*>* possibleMoves){
+    std::vector<Move*>* possibleMoves){
     int x, y;
     //all down moves
     x = r + 1;
@@ -205,7 +197,7 @@ void gen_jumove (int **board, int r, int c, int curPlayer,
 }
 
 void gen_zumove (int **board, int r, int c, int curPlayer, 
-    std::vector<move*>* possibleMoves){
+    std::vector<Move*>* possibleMoves){
     int x, y;
     if (curPlayer == RED) {
         x = r - 1;
@@ -248,7 +240,7 @@ void gen_zumove (int **board, int r, int c, int curPlayer,
 }
 
 void gen_paomove (int **board, int r, int c, int curPlayer, 
-    std::vector<move*>* possibleMoves) {
+    std::vector<Move*>* possibleMoves) {
     int x, y;
     bool hasEncountered = false;
     x = r;
@@ -333,8 +325,8 @@ void gen_paomove (int **board, int r, int c, int curPlayer,
     }
 }
 
-std::vector<move*> generateAllMoves(int **board, int curPlayer){
-    std::vector<move*> possibleMoves;
+std::vector<Move*> generateAllMoves(int **board, int curPlayer){
+    std::vector<Move*> possibleMoves;
     int i,j,piece;
     for (i = 0; i < 10; i++){
         for (j = 0; j < 9; j++) {

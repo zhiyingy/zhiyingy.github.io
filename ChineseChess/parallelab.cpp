@@ -35,7 +35,7 @@ void freeBoard (int **board) {
 
 abResult *seqABP(int curDepth, int alpha, int beta,
     int **board, int curPlayer) {
-    move *bestMove;
+    Move *bestMove;
     int score, endPiece;
     abResult *res = (abResult *)malloc(sizeof(abResult));
 
@@ -45,10 +45,10 @@ abResult *seqABP(int curDepth, int alpha, int beta,
         return res;
     }
 
-    std::vector<move *> possibleMoves = generateAllMoves(board, curPlayer);
+    std::vector<Move *> possibleMoves = generateAllMoves(board, curPlayer);
 
-    for (std::vector<move*>::iterator it = possibleMoves.begin(); it != possibleMoves.end(); it++) {
-        move *curMove = *it;
+    for (std::vector<Move *>::iterator it = possibleMoves.begin(); it != possibleMoves.end(); it++) {
+        Move *curMove = *it;
         endPiece = makeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec);
         abResult *curRes = seqABP(curDepth + 1, -beta, -alpha, board, flipPlayer(curPlayer));
         unmakeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec, endPiece);
@@ -75,7 +75,7 @@ abResult *seqABP(int curDepth, int alpha, int beta,
 
 abResult *firstMoveSearch(int curDepth, int alpha, int beta,
     int **board, int curPlayer) {
-    move *bestMove;
+    Move *bestMove;
     volatile bool flag = false;
     abResult *res = (abResult *)malloc(sizeof(abResult));
 
@@ -84,13 +84,13 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta,
         return res;
     }
 
-    std::vector<move *> possibleMoves = generateAllMoves(board, curPlayer);
+    std::vector<Move *> possibleMoves = generateAllMoves(board, curPlayer);
 
     // if (curDepth == 0) {
     //     std::random_shuffle(possibleMoves.begin(), possibleMoves.end());
     // }
 
-    move *firstMove = possibleMoves.at(0);
+    Move *firstMove = possibleMoves.at(0);
     int endPiece = makeMove(board, firstMove->sr, firstMove->sc, firstMove->er, firstMove->ec);
     abResult *firstRes = firstMoveSearch(curDepth + 1, -beta, -alpha, board, flipPlayer(curPlayer));
     unmakeMove(board, firstMove->sr, firstMove->sc, firstMove->er, firstMove->ec, endPiece);
@@ -117,7 +117,7 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta,
             }
             else {
                 int **boardCopy = makeCopy(board);
-                move *curMove = possibleMoves.at(i);
+                Move *curMove = possibleMoves.at(i);
                 makeMove(boardCopy, curMove->sr, curMove->sc, curMove->er, curMove->ec);
                 abResult *curRes = seqABP(curDepth + 1, -beta, -alpha, boardCopy, flipPlayer(curPlayer));
                 freeBoard(boardCopy);
@@ -145,11 +145,11 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta,
     return res;
 }
 
-move *calculateStepAB(int **board, int curPlayer) {
+Move *calculateStepAB(int **board, int curPlayer) {
     std::srand ( unsigned ( std::time(0) ) );
     abResult *res;
     res = firstMoveSearch(0, NEGINF, POSINF, board, curPlayer);
-    move *m = res->mv;
+    Move *m = res->mv;
     free(res);
     return m;
 }

@@ -7,16 +7,16 @@
 #define C 1.4
 #define MAXSTEP 1
 
-move *calculateStepMC(int **board, int curPlayer);
+Move *calculateStepMC(int **board, int curPlayer);
 
 typedef struct movesMC_t {
 	struct movesMC_t *parent;
-    move *mv;
+    Move *mv;
     int n;
     int wins;
     int player;
     int nextIndex;
-    std::vector<move*> possibleMoves;
+    std::vector<Move*> possibleMoves;
     std::vector<struct movesMC_t *> children;
 } movesMC;
 

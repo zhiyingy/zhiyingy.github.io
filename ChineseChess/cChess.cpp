@@ -368,7 +368,7 @@ int main(int argc, const char *argv[]) {
     double startTime, endTime, timeUsed;
     int piece;
     int aiType;
-    move *mB;
+    Move *mB;
     _argc = argc - 1;
     _argv = argv + 1;
 
