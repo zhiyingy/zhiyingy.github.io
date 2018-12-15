@@ -18,68 +18,56 @@ void deepCopyBoard (int **board, int **result) {
     }
 }
 
-movesMC *newMcNode(movesMC *parent, Move *mv, int **board, int curPlayer) {
-    movesMC *node = (movesMC *)malloc(sizeof(movesMC));
-    node -> mv = mv;
-    node -> n = 0;
-    node -> parent = parent;
-    node -> wins = 0;
-    node -> player = flipPlayer(curPlayer); 
-    //the player playing this move
-
+MovesMC *newMcNode(MovesMC *parent, Move *mv, int **board, int curPlayer) {
+    int endPiece;
     if (mv != NULL){
-        int endPiece = makeMove(board, mv->sr, mv->sc, mv->er, mv->ec);
-        node -> possibleMoves = generateAllMoves(board, curPlayer);
-        unmakeMove(board, mv->sr, mv->sc, mv->er, mv->ec, endPiece);
-    }else{
-        node -> possibleMoves = generateAllMoves(board, curPlayer);
+        endPiece = makeMove(board, mv->sr, mv->sc, mv->er, mv->ec);
     }
-    node->nextIndex = 0;
+    MovesMC *node = new MovesMC(parent,mv,flipPlayer(curPlayer),generateAllMoves(board,curPlayer));
     return node;
 }
 
-movesMC *ucbBestChild(movesMC *node) {
+MovesMC *ucbBestChild(MovesMC *node, double c) {
     double curVal;
     int v;
-    movesMC *chosenChild = NULL;
-    double maxValue = -DBL_MAX;
+    MovesMC *chosenChild = NULL;
+    double maxValue = -1.0;
     int n = node->n;
-    for (std::vector<movesMC*>::iterator it = (node->children).begin(); 
+    int index = 0;
+    int chosenIndex = 0;
+    for (std::vector<MovesMC*>::iterator it = (node->children).begin(); 
         it != (node->children).end(); it++) {
-        movesMC *child = *it;
-        curVal = child->wins*1.0/(child->n) + C*sqrt(log(n)/(child->n));
+        MovesMC *child = *it;
+        curVal = child->wins*1.0/(child->n) + c*sqrt(log(n)/(child->n));
         if (curVal > maxValue){
             maxValue = curVal;
             chosenChild = child;
+            chosenIndex = index;
         }
+        index++;
     }
     return chosenChild;
 }
 
-movesMC *select(int **board, movesMC *root) {
-    movesMC *node = root;
+MovesMC *select(int **board, MovesMC *root) {
+    MovesMC *node = root;
     while (gameOver(board) == 0){
         //expandable
         if (node->possibleMoves.size()>node->nextIndex){
-            movesMC *child = newMcNode(node, node->possibleMoves[node->nextIndex],board,node->player);
+            MovesMC *child = newMcNode(node, node->possibleMoves[node->nextIndex],board,node->player);
             (node->children).push_back(child);
-            if (node->children.size()>5){
-                std::cout<<"possibleMoves "<<(node->children[5]->possibleMoves).size()<<"\n";
-            }
+            node->nextIndex++;
             return child;
         }
         node->possibleMoves.clear();
         //select best ucb child
-        // node = ucbBestChild(node);
-        node = node->children.at(5);
-        std::cout<<"best finished with "<<(node->possibleMoves).size()<<"\n";
-
+        node = ucbBestChild(node,C);
         makeMove(board, node->mv->sr, node->mv->sc, node->mv->er, node->mv->ec);
     }
     return node;
 }
 
-void back(movesMC *node, int win_inc){
+void back(MovesMC *node, int win_inc){
     bool win = false;
     node -> n++;
     node -> wins += win_inc;
@@ -93,8 +81,7 @@ void back(movesMC *node, int win_inc){
     }
 }
 
-int simulate(int **board, movesMC *leaf, int curPlayer) {
-    makeMove(board, leaf->mv->sr, leaf->mv->sc, leaf->mv->er, leaf->mv->ec);
+int simulate(int **board, MovesMC *leaf, int curPlayer) {
     std::vector<Move*> possibleMoves;
     int index, step;
     Move *curMove;
@@ -121,7 +108,7 @@ Move *mcts(int **board, int curPlayer, int simulations){
     int result;
     time_t t;
     srand((unsigned) time(&t));
-    movesMC *root = newMcNode(NULL, NULL, board, curPlayer);
+    MovesMC *root = newMcNode(NULL, NULL, board, curPlayer);
     copyBoard = (int **)malloc(10 * sizeof(int *));
     for (int i = 0; i < 10; i++){
         copyBoard[i] = (int *)malloc(9 * sizeof(int));
@@ -129,7 +116,7 @@ Move *mcts(int **board, int curPlayer, int simulations){
 
     for (int i = 0; i < simulations; i++) {
         deepCopyBoard(board,copyBoard);
-        movesMC *leaf = select(copyBoard, root);
+        MovesMC *leaf = select(copyBoard, root);
         int win_inc = simulate(copyBoard, leaf, curPlayer);
         back(leaf, win_inc);
     }
@@ -138,9 +125,9 @@ Move *mcts(int **board, int curPlayer, int simulations){
         free(copyBoard[i]);
     }
     free(copyBoard);
-    return ucbBestChild(root)->mv;
+    return ucbBestChild(root,0.0)->mv;
 }
 
 Move *calculateStepMC(int **board, int curPlayer){
-    return mcts(board, curPlayer, 40);
+    return mcts(board, curPlayer, 400);
 }

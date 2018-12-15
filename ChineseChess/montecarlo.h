@@ -5,7 +5,7 @@
 
 #define SIM 1000
 #define C 1.4
-#define MAXSTEP 1
+#define MAXSTEP 5
 
 Move *calculateStepMC(int **board, int curPlayer);
 
@@ -19,5 +19,27 @@ typedef struct movesMC_t {
     std::vector<Move*> possibleMoves;
     std::vector<struct movesMC_t *> children;
 } movesMC;
+
+class MovesMC {
+public:
+	MovesMC *parent;
+    Move *mv;
+    int n;
+    int wins;
+    int player;
+    int nextIndex;
+    std::vector<Move*> possibleMoves;
+    std::vector<MovesMC *> children;
+
+    MovesMC(MovesMC *pa,Move *m, int p, std::vector<Move*> moves){
+    	parent = pa;
+    	mv = m;
+    	player = p;
+    	nextIndex = 0;
+    	wins = 0;
+    	n = 0;
+    	possibleMoves = moves;
+    }
+};
 
 #endif
