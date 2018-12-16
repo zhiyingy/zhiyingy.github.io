@@ -10,11 +10,9 @@
 #include <ctime>
 #include <limits.h>
 
-abResult *minSearch(int curDepth, int alpha, int beta,
-    int **board, int curPlayer, movesWithPiece* mp);
+abResult *minSearch(int curDepth, int alpha, int beta, int **board, int curPlayer, movesWithPiece* mp);
 
-abResult *maxSearch(int curDepth, int alpha, int beta,
-    int **board, int curPlayer, movesWithPiece* mp);
+abResult *maxSearch(int curDepth, int alpha, int beta, int **board, int curPlayer, movesWithPiece* mp);
 
 abResult *minSearch(int curDepth, int alpha, int beta, int **board, int curPlayer, movesWithPiece* mp) {
     //base case, has reached max depth or game over
