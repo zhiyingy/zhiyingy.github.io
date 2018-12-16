@@ -14,102 +14,144 @@
 static int _argc;
 static const char **_argv;
 
-int **makeCopy (int **board) {
+int **makeCopy (int **board)
+{
     int i, j;
     int **result = (int **)malloc(10 * sizeof(int *));
-    for (i=0; i < 10; i++) {
+
+    for (i=0; i < 10; i++) 
+    {
         result[i] = (int *)malloc(9 * sizeof(int));
-        for (j=0; j<9; j++){
+        for (j=0; j<9; j++)
+        {
             result[i][j] = board[i][j];
         }
     }
     return result;
 }
 
-void freeBoard (int **board) {
+void freeBoard (int **board)
+{
     int i;
-    for (i=0; i < 10; i++) {
+    for (i=0; i < 10; i++)
+    {
         free(board[i]);
     }
+
     free(board);
 }
 
-
+// From Project 3 source code
 const char *get_option_string(const char *option_name,
             const char *default_value)
 {
-    for (int i = _argc - 2; i >= 0; i -= 2)
-        if (strcmp(_argv[i], option_name) == 0)
+    for (int i = _argc - 2; i >= 0; i -= 2) 
+    {
+        if (strcmp(_argv[i], option_name) == 0) 
+        {
             return _argv[i + 1];
+        }
+    }
+
     return default_value;
 }
 
+// From Project 3 source code
 int get_option_int(const char *option_name, int default_value)
 {
     for (int i = _argc - 2; i >= 0; i -= 2)
+    {
         if (strcmp(_argv[i], option_name) == 0)
+        {
             return atoi(_argv[i + 1]);
+        }
+    }
+
     return default_value;
 }
 
-int flipPlayer(int curPlayer){
-    if (curPlayer == RED){
+int flipPlayer(int curPlayer)
+{
+    if (curPlayer == RED)
+    {
         return BLACK;
     }
+
     return RED;
 }
 
-//return the eaten piece
-int makeMove (int **board, int sr, int sc, int er, int ec){
+//return the captured piece
+int makeMove (int **board, int sr, int sc, int er, int ec)
+{
     int piece = board[er][ec];
     board[er][ec] = board[sr][sc];
     board[sr][sc] = 0;
+
     return piece;
 }
 
-void unmakeMove (int **board, int sr, int sc, int er, int ec, int piece){
+void unmakeMove (int **board, int sr, int sc, int er, int ec, int piece)
+{
     board[sr][sc] = board[er][ec];
     board[er][ec] = piece;
 }
 
 //return the winner
-int gameOver(int **board) {
+int gameOver(int **board) 
+{
     bool redAlive = false;
     bool blackAlive = false;
     int i, j;
-    for (i = 0; i < 3; i++){
-        for (j = 3; j<6; j++){
-            if (board[i][j] == SHUAI * BLACK){
+    for (i = 0; i < 3; i++)
+    {
+        for (j = 3; j<6; j++)
+        {
+            if (board[i][j] == SHUAI * BLACK)
+            {
                 blackAlive = true;
             }
-            if (board[i][j] == SHUAI * RED) {
+            if (board[i][j] == SHUAI * RED)
+            {
                 redAlive = true;
             }
         }
     }
-    for (i=7; i<10; i++){
-        for (j=3; j<6; j++){
-            if (board[i][j] == SHUAI * BLACK){
+
+    for (i=7; i<10; i++)
+    {
+        for (j=3; j<6; j++)
+        {
+            if (board[i][j] == SHUAI * BLACK)
+            {
                 blackAlive = true;
             }
-            if (board[i][j] == SHUAI * RED) {
+            if (board[i][j] == SHUAI * RED)
+            {
                 redAlive = true;
             }
         }
     }
-    if (!blackAlive){
+
+    if (!blackAlive)
+    {
         return RED;
     }
-    if (!redAlive){
+
+    if (!redAlive)
+    {
         return BLACK;
     }
+
     return 0;
 }
 
 void printBoard(int **board){
-    for (int r = 0; r < 10; r++) {
-        for (int j = 0; j < 9; j++) {
-            if (board[r][j] >= 0){
+    for (int r = 0; r < 10; r++)
+    {
+        for (int j = 0; j < 9; j++)
+        {
+            if (board[r][j] >= 0)
+            {
                 std::cout << " ";
             }
             std::cout << board[r][j] << " ";
@@ -118,218 +160,306 @@ void printBoard(int **board){
     }
 }
 
-bool isValidMove(int **board,int sr, int sc, int er, int ec){
-    if (er == sr && ec == sc) {
+bool isValidMove(int **board,int sr, int sc, int er, int ec)
+{
+    if (er == sr && ec == sc)
+    {
         //cannot donnot move
         return false;
     }
-    if (er < 0 || er >= 10 || ec < 0 || ec >= 9){
+    if (er < 0 || er >= 10 || ec < 0 || ec >= 9)
+    {
         return false;
     }
     int piece = board[sr][sc];
     int endPiece = board[er][ec];
-    if (piece * endPiece > 0){
+    if (piece * endPiece > 0)
+    {
         // std::cout << "Cannot eat your own side\n";
         return false;
     }
 
-    switch (piece) {
-        case SHUAI * RED: {
+    switch (piece)
+    {
+        case SHUAI * RED: 
+        {
             //Shuai
             //checkmate condition
-            if (board[er][ec] == SHUAI * BLACK){
-                if (ec != sc) {
+            if (board[er][ec] == SHUAI * BLACK)
+            {
+                if (ec != sc) 
+                {
                     // std::cout << "Two Jiang must be at the same col\n";
                     return false;
                 }
-                for (int r = er+1; r < sr; r++) {
-                    if (board[r][ec] != 0){
+                for (int r = er+1; r < sr; r++)
+                {
+                    if (board[r][ec] != 0)
+                    {
                         // std::cout << "Cannot checkmate with pieces in between\n";
                         return false;
                     }
                 }
-            } else if (ec < 3 || ec >5 || er < 7) {
+            } 
+            else if (ec < 3 || ec >5 || er < 7) 
+            {
                 // std::cout << "Can not move Shuai outside the bound\n";
                 return false;
-            } else if (abs(ec-sc) + abs(er-sr) != 1) {
+            } 
+            else if (abs(ec-sc) + abs(er-sr) != 1) 
+            {
                 // std::cout << "Invalid Shuai Move, can only move up, down, left, right by one\n";
                 return false;
             }
             break;
-        }case SHUAI * BLACK: {
-            if (board[er][ec] == RED * SHUAI){
-                if (ec != sc){
+
+        }
+        case SHUAI * BLACK: 
+        {
+            if (board[er][ec] == RED * SHUAI)
+            {
+                if (ec != sc)
+                {
                     return false;
                 }
 
-                for (int r = sr+1; r < er; r++) {
+                for (int r = sr+1; r < er; r++)
+                {
                     if (board[r][ec] != 0){
                         // std::cout << "Cannot checkmate with pieces in between\n";
                         return false;
                     }
                 }
-            } else if (ec < 3 || ec >5 || er > 2) {
+            } 
+            else if (ec < 3 || ec >5 || er > 2)
+            {
                 // std::cout << "Can not move Shuai outside the bound\n";
                 return false;
-            } else if (abs(ec-sc) + abs(er-sr) != 1) {
+            } 
+            else if (abs(ec-sc) + abs(er-sr) != 1)
+            {
                 // std::cout << "Invalid Shuai Move, can only move up, down, left, right by one\n";
                 return false;
             }
             break;
-        }case SHI * RED:{
+        }
+        case SHI * RED:
+        {
             //SHI
-            if (er < 7 || ec > 5 || ec < 3){
+            if (er < 7 || ec > 5 || ec < 3)
+            {
                 return false;
             }
-            if (abs(er-sr) !=1 || abs(ec-sc) != 1){
-                return false;
-            }
-            break;
-        }case SHI * BLACK: {
-            if (er > 2 || ec > 5 || ec < 3) {
-                return false;
-            }
-            if (abs(sr - er) != 1 || abs(ec-sc) != 1){
+            if (abs(er-sr) !=1 || abs(ec-sc) != 1)
+            {
                 return false;
             }
             break;
-        }case XIANG * RED: {
+        }
+        case SHI * BLACK:
+        {
+            if (er > 2 || ec > 5 || ec < 3)
+            {
+                return false;
+            }
+            if (abs(sr - er) != 1 || abs(ec-sc) != 1)
+            {
+                return false;
+            }
+            break;
+        }
+        case XIANG * RED:
+        {
             //XIANG
-            if (er < 5){
+            if (er < 5)
+            {
                 // std::cout << "Xiang cannot pass the bound\n";
                 return false;
             }
-            if (abs(ec-sc) != 2 || abs(er-sr) != 2){
+            if (abs(ec-sc) != 2 || abs(er-sr) != 2)
+            {
                 // std::cout << "Xiang can move exactly two spaces diagonally\n";
                 return false;
             }
             int midr = sr < er ? sr + 1 : er + 1;
             int midc = sc < ec ? sc + 1 : ec + 1;
-            if (board[midr][midc] != 0){
+            if (board[midr][midc] != 0)
+            {
                 // std::cout << "Xiang cannot move cross occupied points\n";
                 return false;
             }
             break;
-        }case XIANG * BLACK: {
-            if (er > 4) {
+        }
+        case XIANG * BLACK: 
+        {
+            if (er > 4) 
+            {
                 return false;
             }
-            if (abs(ec-sc) != 2 || abs(er-sr) != 2){
+            if (abs(ec-sc) != 2 || abs(er-sr) != 2)
+            {
                 // std::cout << "Xiang can move exactly two spaces diagonally\n";
                 return false;
             }
             int midr = sr < er ? sr + 1 : er + 1;
             int midc = sc < ec ? sc + 1 : ec + 1;
-            if (board[midr][midc] != 0){
+            if (board[midr][midc] != 0)
+            {
                 // std::cout << "Xiang cannot move cross occupied points\n";
                 return false;
             }
             break;
-        }case MA * BLACK:{
+        }
+        case MA * BLACK:
+        {
 
-        }case MA * RED: {
+        }
+        case MA * RED: 
+        {
             //MA
-            if (abs(ec-sc) + abs(er-sr) != 3 || abs(ec-sc) < 1 || abs(er-sr) < 1) {
+            if (abs(ec-sc) + abs(er-sr) != 3 || abs(ec-sc) < 1 || abs(er-sr) < 1) 
+            {
                 // std::cout << "Ma moves one space vertically or horizontally, followed by one space outward-diagonally.\n";
                 return false;
             }
-            if (abs(ec-sc) == 1){
+            if (abs(ec-sc) == 1)
+            {
                 //move vertically first
                 int midr = sr < er ? sr + 1 : er + 1;
-                if (board[midr][sc] != 0) {
+                if (board[midr][sc] != 0) 
+                {
                     return false;
                 }
-            } else {
+            } 
+            else 
+            {
                 int midc = sc < ec ? sc + 1 : ec + 1;
-                if (board[sr][midc] != 0){
+                if (board[sr][midc] != 0)
+                {
                     return false;
                 }
             }
             break;
-        } case JU * BLACK: {
+        } 
+        case JU * BLACK: 
+        {
 
-        } case JU * RED: {
+        } 
+        case JU * RED: 
+        {
             //JU
-            if (er != sr && ec != sc) {
+            if (er != sr && ec != sc) 
+            {
                 // std::cout << "Ju can only move vertically or horizontally.\n";
                 return false;
             }
-            if (er == sr) {
+            if (er == sr) 
+            {
                 int minc = sc < ec ? sc : ec;
                 int maxc = sc < ec ? ec : sc;
                 for (int c = minc+1; c < maxc; c++) {
-                    if (board[sr][c] != 0){
+                    if (board[sr][c] != 0)
+                    {
                         // std::cout << "Ju cannot move cross pieces.\n";
                         return false;
                     }
                 }
-            } else {
+            } 
+            else 
+            {
                 int minr = sr < er ? sr : er;
                 int maxr = sr < er ? er : sr;
-                for (int r = minr +1; r < maxr; r++) {
-                    if (board[r][sc] != 0){
+                for (int r = minr +1; r < maxr; r++) 
+                {
+                    if (board[r][sc] != 0)
+                    {
                         // std::cout << "Ju cannot move cross pieces.\n";
                         return false;
                     }
                 }
             }
             break;
-        } case PAO * BLACK : {
+        } 
+        case PAO * BLACK : 
+        {
 
-        } case PAO * RED: {
+        } 
+        case PAO * RED: 
+        {
             //Pao
-            if (er != sr && ec != sc) {
+            if (er != sr && ec != sc) 
+            {
                 // std::cout << "Pao can only move vertically or horizontally.\n";
                 return false;
             }
             int count = 0;
-            if (er == sr) {
+            if (er == sr) 
+            {
                 //move horizonally
                 int minc = sc < ec ? sc : ec;
                 int maxc = sc < ec ? ec : sc;
-                for (int c = minc+1; c < maxc; c++) {
-                    if (board[sr][c] != 0){
+                for (int c = minc+1; c < maxc; c++) 
+                {
+                    if (board[sr][c] != 0)
+                    {
                         count++;
                     }
                 }
-            } else{
+            } 
+            else{
                 //move vertically
                 int minr = sr < er ? sr : er;
                 int maxr = sr < er ? er : sr;
-                for (int r = minr +1; r < maxr; r++) {
-                    if (board[r][sc] != 0){
+                for (int r = minr +1; r < maxr; r++) 
+                {
+                    if (board[r][sc] != 0)
+                    {
                         count++;
                     }
                 }
             }
-            if (board[er][ec] == 0 && count!=0){
+            if (board[er][ec] == 0 && count!=0)
+            {
                 // std::cout << "Pao cannot move cross pieces if it's not eating one.\n";
                 return false;
-            } else if (board[er][ec]!=0 && count != 1){
+            } 
+            else if (board[er][ec]!=0 && count != 1)
+            {
                 // std::cout << "Pao cannot eat piece without crossing exactly one other piece.\n";
                 return false;
             }
             break;
-        } case ZU * BLACK:{
-            if (er < sr){
+
+        } 
+        case ZU * BLACK:
+        {
+            if (er < sr)
+            {
                 return false;
             }
-            if (sr < 5 && sr == er) {
+            if (sr < 5 && sr == er) 
+            {
                 return false;
             }
-            if (er - sr + abs(ec-sc) > 1) {
+            if (er - sr + abs(ec-sc) > 1) 
+            {
                 return false;
             }
             break;
-        } case ZU * RED: {
+        } 
+        case ZU * RED: 
+        {
             //bin
-            if (er > sr){
+            if (er > sr)
+            {
                 return false;
             }
-            if (sr > 4 && er == sr) {
+            if (sr > 4 && er == sr) 
+            {
                 return false;
             }
-            if (sr - er + abs(ec-sc) > 1){
+            if (sr - er + abs(ec-sc) > 1)
+            {
                 return false;
             }
             break;
@@ -338,9 +468,12 @@ bool isValidMove(int **board,int sr, int sc, int er, int ec){
     return true;
 }
 
-void initializeBoard(int **board){
-    for (int i = 0; i < 10; i++){
-        for (int j = 0; j < 9; j++){
+void initializeBoard(int **board)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        for (int j = 0; j < 9; j++)
+        {
             board[i][j] = 0;
         }
     }
@@ -384,7 +517,8 @@ void initializeBoard(int **board){
 }
 
 
-int main(int argc, const char *argv[]) {
+int main(int argc, const char *argv[]) 
+{
     using namespace std::chrono;
     typedef std::chrono::high_resolution_clock Clock;
     typedef std::chrono::duration<double> dsec;
@@ -398,7 +532,8 @@ int main(int argc, const char *argv[]) {
     const char *algo_type = get_option_string("-m", NULL);
     int num_of_threads = get_option_int("-n", 1);
 
-    if (algo_type[0] == 'm'){
+    if (algo_type[0] == 'm')
+    {
         aiType = MCST;
     } else{
         aiType = AB;
@@ -408,7 +543,8 @@ int main(int argc, const char *argv[]) {
     omp_set_num_threads(num_of_threads);
     
     int **board = (int **)malloc(10 * sizeof(int *));
-    for (int i=0; i<10; i++) {
+    for (int i=0; i<10; i++) 
+    {
         board[i] = (int *)malloc(9 * sizeof(int));
     }
     initializeBoard(board);
@@ -417,9 +553,11 @@ int main(int argc, const char *argv[]) {
 
     printBoard(board);
     int curPlayer = RED; //red, bottom half with negative values
-    while (gameOver(board)==0) {
+    while (gameOver(board)==0) 
+    {
         auto startTime = Clock::now();
-        if (aiType == AB){
+        if (aiType == AB)
+        {
             mB = calculateStepAB(board, curPlayer);
         }else{
             mB = calculateStepMC(board, curPlayer);
@@ -430,12 +568,14 @@ int main(int argc, const char *argv[]) {
         makeMove(board, mB->sr, mB->sc, mB->er, mB->ec);
         free(mB);
         printBoard(board);
-        if (gameOver(board) == RED){
+        if (gameOver(board) == RED)
+        {
             std::cout << "Red Wins!\n";
             return 1;
         }
         curPlayer = BLACK;
-        while (true) {
+        while (true) 
+        {
             std::cout << "enter your move of 4 numbers, space separated: ";
             // user inputs values space separated in one line.  Inputs more than the count are discarded.
             std::cin >> user_move[0] >> user_move[1] >> user_move[2] >> user_move[3];
@@ -443,8 +583,12 @@ int main(int argc, const char *argv[]) {
             piece = board[user_move[0]][user_move[1]];
             if (piece * curPlayer <= 0){
                 std::cout << "Does not have a piece there \n";
-            }else if (isValidMove(board, user_move[0], user_move[1],user_move[2],user_move[3])) {
-                makeMove(board, user_move[0], user_move[1],user_move[2],user_move[3]);
+            }
+            else if (isValidMove(board, user_move[0], 
+                user_move[1],user_move[2],user_move[3])) 
+            {
+                makeMove(board, user_move[0], 
+                    user_move[1],user_move[2],user_move[3]);
                 break;
             }
         }

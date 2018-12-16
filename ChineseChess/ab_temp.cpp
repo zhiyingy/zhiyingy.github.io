@@ -12,29 +12,8 @@
 #include "evaluate.h"
 #include "alphabeta.h"
 
-int **deepCopyBoard (int **board) {
-    int i, j;
-    int **result = (int **)malloc(10 * sizeof(int *));
-    for (i=0; i < 10; i++) {
-        result[i] = (int *)malloc(9 * sizeof(int));
-        for (j=0; j<9; j++){
-            result[i][j] = board[i][j];
-        }
-    }
-    return result;
-}
-
-void deepFreeBoard (int **board) {
-    int i;
-    for (i=0; i < 10; i++) {
-        free(board[i]);
-    }
-    free(board);
-}
-
-abResult *seqABP(int curDepth, int maxDepth, int alpha, int beta,
-    int **board, int curPlayer) {
-    if (curDepth == maxDepth|| gameOver(board) != 0) {
+abResult *seqABP(int curDepth, int alpha, int beta, int **board, int curPlayer) {
+    if (curDepth == MAX_DEPTH|| gameOver(board) != 0) {
         int curScore = evaluate(board, curPlayer);
         abResult *res = (abResult *)malloc(sizeof(abResult));
         res->bestRes = curScore;
@@ -57,7 +36,7 @@ abResult *seqABP(int curDepth, int maxDepth, int alpha, int beta,
 
         makeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec);
 
-        abResult *curRes = seqABP(curDepth + 1, maxDepth, -beta, -alpha, board,
+        abResult *curRes = seqABP(curDepth + 1, -beta, -alpha, board,
             flipPlayer(curPlayer));
         int resS = -(curRes->bestRes);
 
@@ -85,15 +64,14 @@ abResult *seqABP(int curDepth, int maxDepth, int alpha, int beta,
 }
 
 
-abResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
-    int **board, int curPlayer) {
+abResult *firstMoveSearch(int curDepth, int alpha, int beta, int **board, int curPlayer) {
     using namespace std::chrono;
     typedef std::chrono::high_resolution_clock Clock;
     typedef std::chrono::duration<double> dsec;
 
     abResult *res = (abResult *)malloc(sizeof(abResult));
 
-    if (curDepth == maxDepth|| gameOver(board) != 0) {
+    if (curDepth == MAX_DEPTH|| gameOver(board) != 0) {
         int curScore = evaluate(board, curPlayer);
         res->bestRes = curScore;
         res->mv = NULL;
@@ -122,11 +100,11 @@ abResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
                 Move *curMove = possibleMoves[i];
                 int startPiece = board[curMove->sr][curMove->sc];
                 int endPiece = board[curMove->er][curMove->ec];
-                int **boardCopy = deepCopyBoard(board);
+                int **boardCopy = makeCopy(board);
                 makeMove(boardCopy, curMove->sr, curMove->sc, curMove->er, curMove->ec);
-                abResult *curRes = seqABP(curDepth + 1, maxDepth, -beta, -alpha, boardCopy, flipPlayer(curPlayer));
+                abResult *curRes = seqABP(curDepth + 1, -beta, -alpha, boardCopy, flipPlayer(curPlayer));
                 int resScore = -(curRes->bestRes);
-                deepFreeBoard(boardCopy);
+                freeBoard(boardCopy);
                 if (resScore >= beta) {
                     res->bestRes = beta;
                     res->mv = bestMove;
@@ -155,7 +133,7 @@ abResult *firstMoveSearch(int curDepth, int maxDepth, int alpha, int beta,
 Move *calculateStepAB(int **board, int curPlayer) {
     std::srand ( unsigned ( std::time(0) ) );
     abResult *res;
-    res = firstMoveSearch(0, MAX_DEPTH, NEGINF, POSINF, board, curPlayer);
+    res = firstMoveSearch(0, NEGINF, POSINF, board, curPlayer);
     Move *m = new Move(0,0,0,0);
     // Move *m = res->mv;
     free(res);

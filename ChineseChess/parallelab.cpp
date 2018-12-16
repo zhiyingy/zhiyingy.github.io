@@ -13,32 +13,41 @@
 #include "alphabeta.h"
 
 abResult *seqABP(int curDepth, int alpha, int beta,
-    int **board, int curPlayer) {
+    int **board, int curPlayer)
+{
     Move *bestMove;
     int score, endPiece;
     abResult *res = (abResult *)malloc(sizeof(abResult));
 
-    if (curDepth == MAX_DEPTH|| gameOver(board) != 0) {
+    if (curDepth == MAX_DEPTH|| gameOver(board) != 0)
+    {
         res->bestRes = evaluate(board, curPlayer);
         return res;
     }
 
     std::vector<Move *> possibleMoves = generateAllMoves(board, curPlayer);
 
-    for (std::vector<Move *>::iterator it = possibleMoves.begin(); it != possibleMoves.end(); it++) {
+    for (std::vector<Move *>::iterator it = possibleMoves.begin(); 
+        it != possibleMoves.end(); it++) 
+    {
         Move *curMove = *it;
-        endPiece = makeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec);
-        abResult *curRes = seqABP(curDepth + 1, -beta, -alpha, board, flipPlayer(curPlayer));
-        unmakeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec, endPiece);
+        endPiece = makeMove(board, curMove->sr, curMove->sc, curMove->er, 
+            curMove->ec);
+        abResult *curRes = seqABP(curDepth + 1, -beta, -alpha, board, 
+            flipPlayer(curPlayer));
+        unmakeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec, 
+            endPiece);
         score = -curRes->bestRes;
-        if (score >= beta) {
+        if (score >= beta) 
+        {
             res->bestRes = beta;
             res->mv = bestMove;
             free(curRes);
             return res;
         }
 
-        if (score > alpha) {
+        if (score > alpha) 
+        {
             bestMove = curMove;
             alpha = score;
         }
@@ -61,7 +70,8 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta,
     volatile bool flag = false;
     abResult *res = (abResult *)malloc(sizeof(abResult));
 
-    if (curDepth == MAX_DEPTH || gameOver(board) != 0) {
+    if (curDepth == MAX_DEPTH || gameOver(board) != 0) 
+    {
         res->bestRes = evaluate(board, curPlayer);
         return res;
     }
@@ -73,28 +83,35 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta,
     // }
 
     Move *firstMove = possibleMoves.at(0);
-    int endPiece = makeMove(board, firstMove->sr, firstMove->sc, firstMove->er, firstMove->ec);
-    abResult *firstRes = firstMoveSearch(curDepth + 1, -beta, -alpha, board, flipPlayer(curPlayer));
-    unmakeMove(board, firstMove->sr, firstMove->sc, firstMove->er, firstMove->ec, endPiece);
+    int endPiece = makeMove(board, firstMove->sr, firstMove->sc, firstMove->er,
+        firstMove->ec);
+    abResult *firstRes = firstMoveSearch(curDepth + 1, -beta, -alpha, board,
+        flipPlayer(curPlayer));
+    unmakeMove(board, firstMove->sr, firstMove->sc, firstMove->er, 
+        firstMove->ec, endPiece);
     
     int score = -firstRes->bestRes;
-    if (score >= beta) {
+    if (score >= beta) 
+    {
         free(firstRes);
         abResult *res = (abResult *)malloc(sizeof(abResult));
         res->bestRes = beta;
         res->mv = bestMove;
         return res;
     }
-    if (alpha < score) {
+    if (alpha < score) 
+    {
         bestMove = firstMove;
         alpha = score;
     }
 
-    if (possibleMoves.size() > 1)  {
+    if (possibleMoves.size() > 1)  
+    {
         int i;
         auto startTime = Clock::now();
         #pragma omp parallel for default(shared) shared(flag, alpha, bestMove) private(i) schedule(dynamic)
-        for (i = 1; i < possibleMoves.size(); i++) {
+        for (i = 1; i < possibleMoves.size(); i++) 
+        {
             if (flag) {
                 continue;
             }
@@ -102,8 +119,10 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta,
                 int **boardCopy = makeCopy(board);
                 Move *curMove = possibleMoves.at(i);
                 auto st = Clock::now();
-                makeMove(boardCopy, curMove->sr, curMove->sc, curMove->er, curMove->ec);
-                abResult *curRes = seqABP(curDepth + 1, -beta, -alpha, boardCopy, flipPlayer(curPlayer));
+                makeMove(boardCopy, curMove->sr, curMove->sc, 
+                    curMove->er, curMove->ec);
+                abResult *curRes = seqABP(curDepth + 1, -beta, -alpha, 
+                    boardCopy, flipPlayer(curPlayer));
                 freeBoard(boardCopy);
 
                 int resScore = -curRes->bestRes;
@@ -125,7 +144,8 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta,
         }
         std::cout << duration_cast<dsec>(Clock::now() - startTime).count() <<" used at level" << curDepth << "\n";
     }
-    if (flag){
+    if (flag)
+    {
         return res;
     }
     res->bestRes = alpha;
