@@ -5,10 +5,12 @@
 #include <math.h>
 #include <iostream>
 #include <stack> 
+#include <chrono>
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
+#include <omp.h>
 
 void makeCopyBoard(int **board, int** result){
     for (int i = 0; i<10; i++){
@@ -65,6 +67,13 @@ void back(MovesMC *node, int win_inc, int sim_inc){
         win = !win;
     }
 }
+void clearPossibleMoves(std::vector<Move*> possibleMoves){
+    while(!possibleMoves.empty()) {
+        delete possibleMoves.back();
+        possibleMoves.pop_back();
+    }
+    possibleMoves.clear();
+}
 
 int simulate(int **board, MovesMC *leaf, int curPlayer) {
     std::vector<Move*> possibleMoves;
@@ -81,7 +90,7 @@ int simulate(int **board, MovesMC *leaf, int curPlayer) {
         index = rand() % possibleMoves.size();
         curMove = possibleMoves.at(index);
         makeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec);
-        possibleMoves.clear();
+        clearPossibleMoves(possibleMoves);
         nextPlayer = flipPlayer(nextPlayer);
     }
     if (evaluate(board, curPlayer)>0){
@@ -119,6 +128,11 @@ Move *mcts(int **board, int curPlayer, int sim){
     time_t t;
     srand((unsigned) time(&t));
     MovesMC *root = newMcNode(NULL, NULL, board, curPlayer);
+    using namespace std::chrono;
+    typedef std::chrono::high_resolution_clock Clock;
+    typedef std::chrono::duration<double> dsec;
+    double st = 0.0;
+    double bt = 0.0;
 
     copyBoard = (int **)malloc(10 * sizeof(int *));
     for (i = 0; i < 10; i++){
@@ -136,17 +150,27 @@ Move *mcts(int **board, int curPlayer, int sim){
         }
         int wins;
         //do parallel simulation
+        auto cst = Clock::now();
         #pragma omp parallel for default(shared) private(i) schedule(dynamic)
         for (i = 0; i < (int)leaf->children.size(); i++) {
             int **localCopy = makeCopy(board);
             MovesMC *child = leaf->children[i];
             int win = simulate(localCopy, child, curPlayer);
             freeBoard(localCopy);
-            #pragma omp critical
+        #pragma omp critical
+            {
             wins += win;
+            }
         }
+        st += duration_cast<dsec>(Clock::now() - cst).count();
+
+        //back propagation
+        auto t = Clock::now();
         back(leaf, wins, leaf->children.size());
+        bt += duration_cast<dsec>(Clock::now() - t).count();
     }
+    std::cout<< "simulation time is "<<st << "\n";
+    std::cout<< "back time is" << bt <<"\n";
     
     return ucbBestChild(root,0.0)->mv;
 }
