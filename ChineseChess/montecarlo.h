@@ -5,7 +5,7 @@
 
 #define SIM 1000
 #define C 1.4
-#define MAXSTEP 5
+#define MAXSTEP 10
 
 Move *calculateStepMC(int **board, int curPlayer);
 

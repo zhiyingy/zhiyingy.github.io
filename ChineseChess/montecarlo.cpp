@@ -75,6 +75,14 @@ void back(MovesMC *node, int win_inc){
     }
 }
 
+void clearPossibleMoves(std::vector<Move*> possibleMoves){
+    while(!possibleMoves.empty()) {
+        delete possibleMoves.back();
+        possibleMoves.pop_back();
+    }
+    possibleMoves.clear();
+}
+
 int simulate(int **board, MovesMC *leaf, int curPlayer) {
     std::vector<Move*> possibleMoves;
     int index, step;
@@ -88,7 +96,7 @@ int simulate(int **board, MovesMC *leaf, int curPlayer) {
         index = rand() % possibleMoves.size();
         curMove = possibleMoves.at(index);
         makeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec);
-        possibleMoves.clear();
+        clearPossibleMoves(possibleMoves);
         nextPlayer = flipPlayer(nextPlayer);
     }
     if (evaluate(board, curPlayer)>0){
