@@ -12,8 +12,7 @@
 #include "evaluate.h"
 #include "alphabeta.h"
 
-abResult *seqABP(int curDepth, int alpha, int beta,
-    int **board, int curPlayer)
+abResult *seqABP(int curDepth, int alpha, int beta, int **board, int curPlayer)
 {
     Move *bestMove;
     int score, endPiece;
@@ -60,8 +59,7 @@ abResult *seqABP(int curDepth, int alpha, int beta,
 }
 
 
-abResult *firstMoveSearch(int curDepth, int alpha, int beta,
-    int **board, int curPlayer) {
+abResult *firstMoveSearch(int curDepth, int alpha, int beta, int **board, int curPlayer) {
     using namespace std::chrono;
     typedef std::chrono::high_resolution_clock Clock;
     typedef std::chrono::duration<double> dsec;
@@ -78,9 +76,9 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta,
 
     std::vector<Move *> possibleMoves = generateAllMoves(board, curPlayer);
 
-    // if (curDepth == 0) {
-    //     std::random_shuffle(possibleMoves.begin(), possibleMoves.end());
-    // }
+    if (curDepth == 0) {
+        std::random_shuffle(possibleMoves.begin(), possibleMoves.end());
+    }
 
     Move *firstMove = possibleMoves.at(0);
     int endPiece = makeMove(board, firstMove->sr, firstMove->sc, firstMove->er,
