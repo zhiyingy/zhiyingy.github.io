@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <float.h>
 
-void deepCopyBoard (int **board, int **result) {
+void makeCopyBoard (int **board, int **result) {
     int i, j;
     for (i=0; i < 10; i++) {
         for (j=0; j<9; j++){
@@ -116,7 +116,7 @@ Move *mcts(int **board, int curPlayer, int simulations){
     }
 
     for (int i = 0; i < simulations; i++) {
-        deepCopyBoard(board,copyBoard);
+        makeCopyBoard(board,copyBoard);
         MovesMC *leaf = select(copyBoard, root);
         int win_inc = simulate(copyBoard, leaf, curPlayer);
         back(leaf, win_inc);
