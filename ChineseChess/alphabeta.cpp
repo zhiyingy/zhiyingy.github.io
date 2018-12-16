@@ -2,7 +2,6 @@
 #include "cChess.h"
 #include "evaluate.h"
 #include "generateMove.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -11,79 +10,47 @@
 #include <ctime>
 #include <limits.h>
 
-minimaxResult *mini(int curDepth, int maxDepth, int alpha, int beta,
-    int **board, int curPlayer, std::vector<movesWithPlayer*> movesList);
+abResult *minSearch(int curDepth, int alpha, int beta,
+    int **board, int curPlayer, movesWithPiece* mp);
 
-minimaxResult *maxi(int curDepth, int maxDepth, int alpha, int beta,
-    int **board, int curPlayer, std::vector<movesWithPlayer*> movesList);
+abResult *maxSearch(int curDepth, int alpha, int beta,
+    int **board, int curPlayer, movesWithPiece* mp);
 
-
-int calcScore(int **board, int curPlayer, std::vector<movesWithPlayer*> movesList){
-    for (std::vector<movesWithPlayer*>::iterator it = movesList.begin(); it != movesList.end(); it++){
-        movesWithPlayer *mp = *it;
-        mp->startPiece = board[mp->mv->sr][mp->mv->sc];
-        mp->endPiece = board[mp->mv->er][mp->mv->ec];
-        makeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec);
-    }
-    int curScore = evaluate(board, curPlayer);
-    for (std::vector<movesWithPlayer*>::reverse_iterator it = movesList.rbegin(); it != movesList.rend(); it++){
-        movesWithPlayer *mp = *it;
-        unmakeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec, mp->endPiece);
-    }
-    return curScore;
-}
-
-minimaxResult *mini(int curDepth, int maxDepth, int alpha, int beta,
-    int **board, int curPlayer, std::vector<movesWithPlayer*> movesList) {
-    
-    // std :: cout << "mini called with depth " << curDepth <<" and max depth =" << maxDepth << "\n";
-
-    if (maxDepth == curDepth || gameOver(board) != 0) {
-        int curScore = calcScore(board, curPlayer, movesList);
-        minimaxResult *res = (minimaxResult *)calloc(1,sizeof(minimaxResult));
+abResult *minSearch(int curDepth, int alpha, int beta, int **board, int curPlayer, movesWithPiece* mp) {
+    //base case, has reached max depth or game over
+    if (MAX_DEPTH == curDepth || gameOver(board) != 0) {
+        int curScore = evaluate(board, curPlayer);
+        abResult *res = (abResult *)malloc(sizeof(abResult));
         res->bestRes = curScore;
         res->mv = NULL;
         return res;
     }
 
-    for (std::vector<movesWithPlayer*>::iterator it = movesList.begin(); it != movesList.end(); it++){
-        movesWithPlayer *mp = *it;
-        mp->startPiece = board[mp->mv->sr][mp->mv->sc];
-        mp->endPiece = board[mp->mv->er][mp->mv->ec];
-        makeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec);
-    }
+    //make the move specified in mp
+    makeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec);
 
-    std::vector<move*> possibleMoves = generateAllMoves(board, curPlayer);
+    //generate all possible moves in the next round
+    std::vector<Move*> possibleMoves = generateAllMoves(board, curPlayer);
 
-    for (std::vector<movesWithPlayer*>::reverse_iterator it = movesList.rbegin(); it != movesList.rend(); it++){
-        movesWithPlayer *mp = *it;
-        unmakeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec, mp->endPiece);
-    }
-
-    move *bestMove = NULL;
+    Move *bestMove = NULL;
     int resS = POSINF;
-    int count = 0;
-    for (std::vector<move*>::iterator it = possibleMoves.begin(); it != possibleMoves.end(); it++) {
-        count++;
-        move *curMove = *it;
-        // if (curMove -> ec < 0){
-        //     std::cout << "wholy shit\n";
-        // }
 
-        std::vector<movesWithPlayer*> curMovesList = movesList;
-        movesWithPlayer *mp = (movesWithPlayer *)calloc(1,sizeof(movesWithPlayer));
-        mp->mv = curMove;
-        mp->player = curPlayer;
-        mp->startPiece = board[curMove->sr][curMove->sc];
-        mp->endPiece = board[curMove->er][curMove->ec];
-        curMovesList.push_back(mp);
-
-        minimaxResult *curRes = maxi(curDepth + 1, maxDepth, alpha, beta, board, flipPlayer(curPlayer), curMovesList);
+    //traverse possible moves
+    for (std::vector<Move*>::iterator it = possibleMoves.begin(); it != possibleMoves.end(); it++) {
+        Move *curMove = *it;
+        //construct the next move with player
+        movesWithPiece *nextMp = (movesWithPiece *)malloc(sizeof(movesWithPiece));
+        nextMp->mv = curMove;
+        nextMp->endPiece = board[curMove->er][curMove->ec];
+        //call max on counter player
+        abResult *curRes = maxSearch(curDepth + 1, alpha, beta, board, flipPlayer(curPlayer), nextMp);
+        
+        //alpha beta pruning here
         if (curRes->bestRes < resS){
             resS = curRes->bestRes;
         }
 
-        if (alpha <= curRes->bestRes && curRes->bestRes <= beta) {
+        if (alpha <= curRes->bestRes && curRes->bestRes < beta) {
             bestMove = curMove;
         }
 
@@ -93,70 +60,62 @@ minimaxResult *mini(int curDepth, int maxDepth, int alpha, int beta,
 
         if (beta <= alpha) {
             free(curRes);
-            minimaxResult *res = (minimaxResult *)calloc(1,sizeof(minimaxResult));
+            abResult *res = (abResult *)calloc(1,sizeof(abResult));
             res->bestRes = beta;
             res->mv = bestMove;
+            unmakeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec, mp->endPiece);
             return res;
         }
         free(curRes);
     }
-    minimaxResult *res = (minimaxResult *)calloc(1,sizeof(minimaxResult));
+    abResult *res = (abResult *)calloc(1,sizeof(abResult));
     res->bestRes = resS;
     res->mv = bestMove;
+    unmakeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec, mp->endPiece);
     return res;
 }
 
-minimaxResult *maxi(int curDepth, int maxDepth, int alpha, int beta,
-    int **board, int curPlayer, std::vector<movesWithPlayer*> movesList) {
+abResult *maxSearch(int curDepth, int alpha, int beta, int **board, int curPlayer, movesWithPiece* mp) {
 
-    // std :: cout << "maxi called with depth " << curDepth <<" and max depth =" << maxDepth << "\n";
-    if (maxDepth == curDepth || gameOver(board) != 0) {
-        int curScore = calcScore(board, curPlayer, movesList);
-        minimaxResult *res = (minimaxResult *)calloc(1,sizeof(minimaxResult));
+    //base case
+    if (MAX_DEPTH == curDepth || gameOver(board) != 0) {
+        int curScore = evaluate(board, curPlayer);
+        abResult *res = (abResult *)calloc(1,sizeof(abResult));
         res->bestRes = curScore;
         res->mv = NULL;
         return res;
     }
-
-    for (std::vector<movesWithPlayer*>::iterator it = movesList.begin(); it != movesList.end(); it++){
-        movesWithPlayer *mp = *it;
-        mp->startPiece = board[mp->mv->sr][mp->mv->sc];
-        mp->endPiece = board[mp->mv->er][mp->mv->ec];
+    //if has move, make the move
+    if (mp != NULL){
         makeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec);
     }
     
-    std::vector<move*> possibleMoves = generateAllMoves(board, curPlayer);
+    //generate all possible moves
+    std::vector<Move*> possibleMoves = generateAllMoves(board, curPlayer);
 
-    for (std::vector<movesWithPlayer*>::reverse_iterator it = movesList.rbegin(); it != movesList.rend(); it++){
-        movesWithPlayer *mp = *it;
-        unmakeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec, mp->endPiece);
-    }
-
+    //randomly shuffle
     if (curDepth == 0) {
         std::random_shuffle(possibleMoves.begin(), possibleMoves.end());
     }
 
-    move *bestMove = NULL;
+    Move *bestMove = NULL;
     int resS = NEGINF;
 
-    for (std::vector<move*>::iterator it = possibleMoves.begin(); it != possibleMoves.end(); it++) {
-        move *curMove = *it;
+    for (std::vector<Move*>::iterator it = possibleMoves.begin(); it != possibleMoves.end(); it++) {
+        Move *curMove = *it;
+        //construct next mv
+        movesWithPiece *nextMp = (movesWithPiece *)malloc(sizeof(movesWithPiece));
+        nextMp->mv = curMove;
+        nextMp->endPiece = board[curMove->er][curMove->ec];
 
-        std::vector<movesWithPlayer*> curMovesList = movesList;
-        movesWithPlayer *mp = (movesWithPlayer *)calloc(1,sizeof(movesWithPlayer));
-        mp->mv = curMove;
-        mp->player = curPlayer;
-        mp->startPiece = board[curMove->sr][curMove->sc];
-        mp->endPiece = board[curMove->er][curMove->ec];
-        curMovesList.push_back(mp);
+        //call min search
+        abResult *curRes = minSearch(curDepth + 1, alpha, beta, board, flipPlayer(curPlayer), nextMp);
 
-        minimaxResult *curRes = mini(curDepth + 1, maxDepth, alpha, beta, board, flipPlayer(curPlayer), curMovesList);
-
+        //alpha beta pruning
         if (curRes->bestRes > resS){
             resS = curRes->bestRes;
         }
 
-        // now undo this move
         if (alpha <= curRes->bestRes && curRes->bestRes <= beta) {
           bestMove = curMove;
         }
@@ -167,26 +126,30 @@ minimaxResult *maxi(int curDepth, int maxDepth, int alpha, int beta,
 
         if (beta <= alpha) {
             free(curRes);
-            minimaxResult *res = (minimaxResult *)calloc(1,sizeof(minimaxResult));
+            abResult *res = (abResult *)malloc(sizeof(abResult));
             res->bestRes = beta;
             res->mv = bestMove;
+            if (mp != NULL){
+                unmakeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec, mp->endPiece);
+            }
             return res;
         }
         free(curRes);
     }
-    minimaxResult *res = (minimaxResult *)calloc(1,sizeof(minimaxResult));
+    abResult *res = (abResult *)malloc(sizeof(abResult));
     res->bestRes = resS;
     res->mv = bestMove;
+    if (mp != NULL) {
+        unmakeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec, mp->endPiece);
+    }
     return res;
 }
 
-move *calculateStepAB(int **board, int curPlayer) {
+Move *calculateStepAB(int **board, int curPlayer) {
     std::srand (unsigned ( std::time(0) ) );
 
-    std::vector<movesWithPlayer*> movesList;
-    minimaxResult *res = maxi(0, MAX_DEPTH, NEGINF, POSINF, board, curPlayer, movesList);
-    move *m = res->mv;
+    abResult *res = maxSearch(0, NEGINF, POSINF, board, curPlayer, NULL);
+    Move *m = res->mv;
     free(res);
     return m;
-    // return NULL;
 }

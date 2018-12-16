@@ -10,11 +10,10 @@ typedef struct abResult_t {
   Move *mv;
 } abResult;
 
-typedef struct movesWithPlayer_t {
+typedef struct movesWithPiece_t {
     Move *mv;
-    int player;
-    int startPiece;
-} movesWithPlayer;
+    int endPiece;
+} movesWithPiece;
 
 Move *calculateStepAB(int **board, int curPlayer);
 

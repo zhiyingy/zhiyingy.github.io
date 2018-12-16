@@ -4,7 +4,7 @@ OBJS += cChess.o
 OBJS += evaluate.o
 OBJS += parallelMcts.o
 OBJS += generateMove.o
-OBJS += parallelab.o
+OBJS += alphabeta.o
 
 default: $(APP_NAME)
 

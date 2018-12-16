@@ -18,7 +18,6 @@ abResult *seqABP(int curDepth, int alpha, int beta,
     int score, endPiece;
     abResult *res = (abResult *)malloc(sizeof(abResult));
 
-
     if (curDepth == MAX_DEPTH|| gameOver(board) != 0) {
         res->bestRes = evaluate(board, curPlayer);
         return res;
@@ -116,7 +115,7 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta,
                     res->mv = bestMove;
                     flag = true;
                 }
-                // #pragma omp critical
+                #pragma omp critical
                 if (alpha < resScore) {
                     bestMove = curMove;
                     alpha = resScore;
