@@ -3,7 +3,7 @@
 Zhiying Yao (zhiyingy), Hongyi Ding (hongyid)
 
 ## Final Report
-[final report](https://github.com/zhiyingy/zhiyingy.github.io/final.pdf)
+[final report](https://github.com/zhiyingy/zhiyingy.github.io/blob/master/Final%20Project%20Report.pdf)
 
 ### Summary
 
