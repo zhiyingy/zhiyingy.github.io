@@ -16,11 +16,11 @@ abResult *seqABP(int curDepth, int alpha, int beta, int **board, int curPlayer)
 {
     Move *bestMove;
     int score, endPiece;
-    abResult *res = (abResult *)malloc(sizeof(abResult));
 
     if (curDepth == MAX_DEPTH|| gameOver(board) != 0)
     {
-        res->bestRes = evaluate(board, curPlayer);
+        score = evaluate(board, curPlayer);
+        abResult *res = new abResult(score, NULL);
         return res;
     }
 
@@ -39,9 +39,8 @@ abResult *seqABP(int curDepth, int alpha, int beta, int **board, int curPlayer)
         score = -curRes->bestRes;
         if (score >= beta) 
         {
-            res->bestRes = beta;
-            res->mv = bestMove;
-            free(curRes);
+            abResult *res = new abResult(beta, bestMove);
+            delete curRes;
             return res;
         }
 
@@ -50,11 +49,10 @@ abResult *seqABP(int curDepth, int alpha, int beta, int **board, int curPlayer)
             bestMove = curMove;
             alpha = score;
         }
-        free(curRes);
+        delete curRes;
     }
 
-    res->bestRes = alpha;
-    res->mv = bestMove;
+    abResult *res = new abResult(alpha, bestMove);
     return res;
 }
 
@@ -66,7 +64,7 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta, int **board, int cu
 
     Move *bestMove;
     volatile bool flag = false;
-    abResult *res = (abResult *)malloc(sizeof(abResult));
+    abResult *res = new abResult(0, NULL);
 
     if (curDepth == MAX_DEPTH || gameOver(board) != 0) 
     {
@@ -91,12 +89,12 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta, int **board, int cu
     int score = -firstRes->bestRes;
     if (score >= beta) 
     {
-        free(firstRes);
-        abResult *res = (abResult *)malloc(sizeof(abResult));
+        delete firstRes;
         res->bestRes = beta;
         res->mv = bestMove;
         return res;
     }
+
     if (alpha < score) 
     {
         bestMove = firstMove;
@@ -124,9 +122,6 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta, int **board, int cu
                 freeBoard(boardCopy);
 
                 int resScore = -curRes->bestRes;
-                if (curDepth == 0) {
-                    std::cout << duration_cast<dsec>(Clock::now() - st).count() << " for thread "<<omp_get_thread_num()<<"\n";
-                }
                 if (resScore >= beta) {
                     res->bestRes = beta;
                     res->mv = bestMove;
@@ -137,7 +132,7 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta, int **board, int cu
                     bestMove = curMove;
                     alpha = resScore;
                 }
-                free(curRes);
+                delete (curRes);
             }
         }
         std::cout << duration_cast<dsec>(Clock::now() - startTime).count() <<" used at level" << curDepth << "\n";
@@ -156,6 +151,6 @@ Move *calculateStepAB(int **board, int curPlayer) {
     abResult *res;
     res = firstMoveSearch(0, NEGINF, POSINF, board, curPlayer);
     Move *m = res->mv;
-    free(res);
+    delete(res);
     return m;
 }

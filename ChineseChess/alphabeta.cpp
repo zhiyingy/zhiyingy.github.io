@@ -18,9 +18,7 @@ abResult *minSearch(int curDepth, int alpha, int beta, int **board, int curPlaye
     //base case, has reached max depth or game over
     if (MAX_DEPTH == curDepth || gameOver(board) != 0) {
         int curScore = evaluate(board, curPlayer);
-        abResult *res = (abResult *)malloc(sizeof(abResult));
-        res->bestRes = curScore;
-        res->mv = NULL;
+        abResult *res = new abResult(curScore, NULL);
         return res;
     }
 
@@ -57,14 +55,14 @@ abResult *minSearch(int curDepth, int alpha, int beta, int **board, int curPlaye
         }
 
         if (beta <= alpha) {
-            free(curRes);
+            delete(curRes);
             abResult *res = (abResult *)calloc(1,sizeof(abResult));
             res->bestRes = beta;
             res->mv = bestMove;
             unmakeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec, mp->endPiece);
             return res;
         }
-        free(curRes);
+        delete(curRes);
     }
     abResult *res = (abResult *)calloc(1,sizeof(abResult));
     res->bestRes = resS;
@@ -123,20 +121,17 @@ abResult *maxSearch(int curDepth, int alpha, int beta, int **board, int curPlaye
         }
 
         if (beta <= alpha) {
-            free(curRes);
-            abResult *res = (abResult *)malloc(sizeof(abResult));
-            res->bestRes = beta;
-            res->mv = bestMove;
+            delete (curRes);
+            abResult *res = new abResult(beta, bestMove);
             if (mp != NULL){
                 unmakeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec, mp->endPiece);
             }
             return res;
         }
-        free(curRes);
+        delete (curRes);
     }
-    abResult *res = (abResult *)malloc(sizeof(abResult));
-    res->bestRes = resS;
-    res->mv = bestMove;
+
+    abResult *res = new abResult(resS, bestMove);
     if (mp != NULL) {
         unmakeMove(board, mp->mv->sr, mp->mv->sc, mp->mv->er, mp->mv->ec, mp->endPiece);
     }
@@ -148,6 +143,6 @@ Move *calculateStepAB(int **board, int curPlayer) {
 
     abResult *res = maxSearch(0, NEGINF, POSINF, board, curPlayer, NULL);
     Move *m = res->mv;
-    free(res);
+    delete (res);
     return m;
 }

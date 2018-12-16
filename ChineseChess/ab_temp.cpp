@@ -15,9 +15,7 @@
 abResult *seqABP(int curDepth, int alpha, int beta, int **board, int curPlayer) {
     if (curDepth == MAX_DEPTH|| gameOver(board) != 0) {
         int curScore = evaluate(board, curPlayer);
-        abResult *res = (abResult *)malloc(sizeof(abResult));
-        res->bestRes = curScore;
-        res->mv = NULL;
+        abResult *res = new abResult(curScore, NULL);
         return res;
     }
 
@@ -43,8 +41,8 @@ abResult *seqABP(int curDepth, int alpha, int beta, int **board, int curPlayer) 
         unmakeMove(board, curMove->sr, curMove->sc, curMove->er, curMove->ec, endPiece);
 
         if (beta <= resS) {
-            free(curRes);
-            abResult *res = (abResult *)malloc(sizeof(abResult));
+            delete(curRes);
+            abResult *res = new abResult(beta, bestMove);
             res->bestRes = beta;
             res->mv = bestMove;
             return res;
@@ -54,10 +52,10 @@ abResult *seqABP(int curDepth, int alpha, int beta, int **board, int curPlayer) 
             bestMove = curMove;
             alpha = resS;
         }
-        free(curRes);
+        delete(curRes);
     }
 
-    abResult *res = (abResult *)malloc(sizeof(abResult));
+    abResult *res = new abResult(alpha, bestMove);
     res->bestRes = alpha;
     res->mv = bestMove;
     return res;
@@ -69,7 +67,7 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta, int **board, int cu
     typedef std::chrono::high_resolution_clock Clock;
     typedef std::chrono::duration<double> dsec;
 
-    abResult *res = (abResult *)malloc(sizeof(abResult));
+    abResult *res = new abResult(0, NULL);
 
     if (curDepth == MAX_DEPTH|| gameOver(board) != 0) {
         int curScore = evaluate(board, curPlayer);
@@ -115,7 +113,7 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta, int **board, int cu
                     bestMove = curMove;
                     alpha = curRes->bestRes;
                 }
-                free(curRes);
+                delete(curRes);
             }
         }
         totalTime += duration_cast<dsec>(Clock::now() - init_start).count();
@@ -131,11 +129,8 @@ abResult *firstMoveSearch(int curDepth, int alpha, int beta, int **board, int cu
 }
 
 Move *calculateStepAB(int **board, int curPlayer) {
-    std::srand ( unsigned ( std::time(0) ) );
+    std::srand(unsigned(std::time(0)));
     abResult *res;
     res = firstMoveSearch(0, NEGINF, POSINF, board, curPlayer);
-    Move *m = new Move(0,0,0,0);
-    // Move *m = res->mv;
-    free(res);
-    return m;
+    return res->mv;
 }

@@ -17,14 +17,6 @@
 #define MCST 0
 #define AB 1
 
-typedef struct move_t {
-  // x cols, y rows
-  int sr;
-  int sc;
-  int er;
-  int ec;
-} move;
-
 class Move{
 	public:
 		int sr;

@@ -5,10 +5,15 @@
 
 #define MAX_DEPTH 6
 
-typedef struct abResult_t {
-  int bestRes;
-  Move *mv;
-} abResult;
+class abResult{
+	public:
+		int bestRes;
+		Move *mv;
+		abResult(int res, Move* m) {
+			bestRes = res;
+			mv = m;
+		}
+};
 
 typedef struct movesWithPiece_t {
     Move *mv;
