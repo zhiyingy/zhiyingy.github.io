@@ -13,26 +13,6 @@
 #include "evaluate.h"
 #include "alphabeta.h"
 
-int **makeCopy (int **board) {
-    int i, j;
-    int **result = (int **)malloc(10 * sizeof(int *));
-    for (i=0; i < 10; i++) {
-        result[i] = (int *)malloc(9 * sizeof(int));
-        for (j=0; j<9; j++){
-            result[i][j] = board[i][j];
-        }
-    }
-    return result;
-}
-
-void freeBoard (int **board) {
-    int i;
-    for (i=0; i < 10; i++) {
-        free(board[i]);
-    }
-    free(board);
-}
-
 abResult *seqABP(int curDepth, int alpha, int beta,
     int **board, int curPlayer) {
     Move *bestMove;

@@ -31,7 +31,6 @@ MovesMC *ucbBestChild(MovesMC *node, double c) {
     MovesMC *chosenChild = NULL;
     double maxValue = -1.0;
     int n = node->n;
-    int index = 0;
     for (std::vector<MovesMC*>::iterator it = (node->children).begin(); 
         it != (node->children).end(); it++) {
         MovesMC *child = *it;
@@ -40,7 +39,6 @@ MovesMC *ucbBestChild(MovesMC *node, double c) {
             maxValue = curVal;
             chosenChild = child;
         }
-        index++;
     }
     return chosenChild;
 }

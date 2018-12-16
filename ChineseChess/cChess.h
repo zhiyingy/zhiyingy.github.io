@@ -44,5 +44,7 @@ int makeMove (int **board, int sr, int sc, int er, int ec);
 void unmakeMove (int **board, int sr, int sc, int er, int ec, int piece);
 int gameOver(int **board);
 int flipPlayer(int curPlayer);
+int **makeCopy(int **board);
+void freeBoard(int **board);
 
 #endif
