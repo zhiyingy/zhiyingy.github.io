@@ -1,10 +1,13 @@
 # To compile parallel version
-
-`g++ -o cChess cChess.cpp evaluate.cpp montecarlo.cpp generateMove.cpp parallelab.cpp -fopenmp -O3 -m64`
+Edit Makefile to include 
+` OBJS += parallelMcts.o ` and `OBJS += parallelab.o`
 
 # To compile sequential version
+Edit Makefile to include 
+` OBJS += montecarlo.o ` and `OBJS += alphabeta.o`
 
-`g++ -o cChess cChess.cpp evaluate.cpp montecarlo.cpp generateMove.cpp alphabeta.cpp -fopenmp -O3 -m64`
+# To compile
+run `make clean` first to remove all -o files, and then run `make cpu`
 
 # To run the program:
 
